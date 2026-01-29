@@ -12,7 +12,7 @@ const RegisterEmployee = () => {
   const axios = useAxios();
   const navigate = useNavigate();
   const location = useLocation();
-  const { registerUser, updateUserProfile } = useAuth();
+  const { registerWithEmail } = useAuth(); // ✅ fix here
   const [passType, setPassType] = useState(false);
 
   const {
@@ -23,33 +23,33 @@ const RegisterEmployee = () => {
 
   const handleRegistration = async (data) => {
     try {
-      // 1️⃣ Firebase Registration
-      const result = await registerUser(data.email, data.password);
+      // 1️⃣ Firebase + AuthProvider register
+      const result = await registerWithEmail(
+        data.name,
+        data.email,
+        data.password,
+        data.photoURL, // profileImage
+        "employee" // role
+      );
+
       if (!result?.user) throw new Error("Firebase registration failed");
 
-      // 2️⃣ Firebase Profile Update
-      await updateUserProfile({
-        displayName: data.name,
-        photoURL: data.photoURL,
-      });
-
-      // 3️⃣ MongoDB Payload
+      // 2️⃣ MongoDB Payload
       const employeeInfo = {
         name: data.name,
-        email: data.email,
+        email: data.email.toLowerCase().trim(),
         role: "employee",
         photo: data.photoURL,
         dateOfBirth: data.dateOfBirth,
         createdAt: new Date(),
       };
 
-      // 4️⃣ MongoDB Save
+      // 3️⃣ Save in backend
       const res = await axios.post("/register/employee", employeeInfo);
 
       if (!res.data?.token) throw new Error("MongoDB user save failed");
 
       toast.success("Welcome to AssetVerse 🎉");
-      // তোমার অরিজিনাল নেভিগেশন
       navigate(location?.state || "/");
     } catch (error) {
       console.error("Employee Register Error:", error);

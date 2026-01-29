@@ -24,7 +24,7 @@ import { GiArmorUpgrade } from "react-icons/gi";
 import { IoLogOut } from "react-icons/io5";
 
 const DashboardLayout = () => {
-  const { user, logOut } = useAuth();
+  const { user, logout } = useAuth();
   const axiosSecure = useAxiosSecure();
   const { role } = useRole();
 
@@ -39,7 +39,7 @@ const DashboardLayout = () => {
 
   if (isLoading) return <Loading />;
 
-  const handleLogOut = () => logOut();
+  const handleLogOut = () => logout();
 
   // Sidebar menu items based on role
   const menuItems = role === "hr" ? [

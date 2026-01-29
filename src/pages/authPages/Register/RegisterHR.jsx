@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 const RegisterHR = () => {
   const axios = useAxios();
   const navigate = useNavigate();
-  const { registerUser, updateUserProfile } = useAuth();
+  const { registerWithEmail } = useAuth(); // ✅ fix here
   const [passType, setPassType] = useState(false);
 
   const {
@@ -21,17 +21,18 @@ const RegisterHR = () => {
 
   const handleRegistration = async (data) => {
     try {
-      // 1. Firebase create
-      const result = await registerUser(data.email, data.password);
+      // 1. Firebase + AuthProvider register
+      const result = await registerWithEmail(
+        data.name,
+        data.email,
+        data.password,
+        data.companyLogo, // profileImage
+        "hr" // role
+      );
+
       if (!result?.user) throw new Error("Firebase registration failed");
 
-      // 2. Firebase profile update
-      await updateUserProfile({
-        displayName: data.name,
-        photoURL: data.companyLogo,
-      });
-
-      // 3. MongoDB payload
+      // 2. MongoDB payload
       const hrInfo = {
         name: data.name,
         email: data.email.toLowerCase().trim(),
@@ -45,13 +46,12 @@ const RegisterHR = () => {
         createdAt: new Date(),
       };
 
-      // 4. MongoDB save
+      // 3. Save in backend
       const res = await axios.post("/register/hr", hrInfo);
 
       if (res.data?.token) {
         localStorage.setItem("access-token", res.data.token);
         toast.success("Welcome HR! Redirecting to Dashboard...");
-
 
         setTimeout(() => {
           window.location.replace("/dashboard");
