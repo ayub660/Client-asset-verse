@@ -1,7 +1,7 @@
 // src/pages/public/RegisterEmployee.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthProvider";
+import { useAuth } from "../../contexts/AuthProvider";
 import Swal from "sweetalert2";
 
 const RegisterEmployee = () => {

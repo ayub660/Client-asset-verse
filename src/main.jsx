@@ -8,6 +8,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AuthProvider from "./contexts/AuthProvider/AuthProvider.jsx";
 
+
+
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")).render(
   <StrictMode>

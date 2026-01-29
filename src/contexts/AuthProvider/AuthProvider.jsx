@@ -1,19 +1,18 @@
-// src/context/AuthProvider.jsx
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { auth, googleProvider } from "../services/firebase.config";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { auth, googleProvider } from "../../services/firebase.config";
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     signInWithPopup,
     signOut,
     onAuthStateChanged,
-    updateProfile
+    updateProfile,
 } from "firebase/auth";
 import Swal from "sweetalert2";
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [role, setRole] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -40,12 +39,11 @@ export const AuthProvider = ({ children }) => {
                 title: "Registration Successful",
                 text: `Welcome ${name}`,
                 showConfirmButton: false,
-                timer: 1500
+                timer: 1500,
             });
 
             return { user: res.user, role: userRole };
         } catch (error) {
-            // Custom messages instead of Firebase technical error
             if (error.code === "auth/email-already-in-use") {
                 showError("This email is already registered. Please use a different email.");
             } else if (error.code === "auth/invalid-email") {
@@ -73,7 +71,7 @@ export const AuthProvider = ({ children }) => {
                 title: "Login Successful",
                 text: `Welcome back ${res.user.displayName || "User"}`,
                 showConfirmButton: false,
-                timer: 1500
+                timer: 1500,
             });
 
             return { user: res.user, role: savedRole };
@@ -102,7 +100,7 @@ export const AuthProvider = ({ children }) => {
                 title: "Login Successful",
                 text: `Welcome ${res.user.displayName}`,
                 showConfirmButton: false,
-                timer: 1500
+                timer: 1500,
             });
 
             return { user: res.user, role: selectedRole };
@@ -138,19 +136,21 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            role,
-            loading,
-            registerWithEmail,
-            loginWithEmail,
-            loginWithGoogle,
-            logout,
-            setRole
-        }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                role,
+                loading,
+                registerWithEmail,
+                loginWithEmail,
+                loginWithGoogle,
+                logout,
+                setRole,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export default AuthProvider;

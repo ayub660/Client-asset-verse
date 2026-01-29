@@ -1,7 +1,7 @@
 // src/components/common/Navbar.jsx
 import React from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthProvider";
+import { useAuth } from "../../contexts/AuthProvider";
 import { FaUserCircle } from "react-icons/fa";
 
 const Navbar = () => {

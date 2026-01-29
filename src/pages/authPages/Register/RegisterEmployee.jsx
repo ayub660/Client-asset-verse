@@ -1,6 +1,7 @@
 import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
-import { Link, useLocation, useNavigate } from "react-router"; // তোমার অরিজিনাল ইমপোর্ট
+
 import useAuth from "../../../hooks/useAuth";
 import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaImage, FaLock, FaCalendarDays } from "react-icons/fa6";

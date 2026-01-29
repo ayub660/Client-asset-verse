@@ -52,8 +52,7 @@ const RegisterHR = () => {
         localStorage.setItem("access-token", res.data.token);
         toast.success("Welcome HR! Redirecting to Dashboard...");
 
-        // ✅ মেইন ফিক্স: হার্ড রিফ্রেশ দিয়ে ড্যাশবোর্ডে পাঠানো
-        // এটি করলে 'Loading' এ আটকে থাকার সুযোগ থাকবে না
+
         setTimeout(() => {
           window.location.replace("/dashboard");
         }, 1200);

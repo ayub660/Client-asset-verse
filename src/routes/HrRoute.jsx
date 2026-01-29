@@ -3,6 +3,7 @@ import useAuth from "../hooks/useAuth";
 import useRole from "../hooks/useRole";
 import Loading from "../components/Loading/Loading";
 
+
 const HrRoute = ({ children }) => {
   const { loading } = useAuth();
   const { role, roleLoading } = useRole();

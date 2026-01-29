@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 
 const Login = () => {
   const axios = useAxios();
-  const { loginUser, signInWithGoogle } = useAuth();
+  const { loginWithEmail, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [passType, setPassType] = useState(false);
@@ -47,7 +47,7 @@ const Login = () => {
   // ✅ Email / Password Login
   const handleLogin = async (data) => {
     try {
-      const result = await loginUser(data.email, data.password);
+      const result = await loginWithEmail(data.email, data.password);
       toast.success(`Welcome Back ${result.user.displayName || "User"}`);
       await handleAuthSuccess(result.user);
     } catch (err) {

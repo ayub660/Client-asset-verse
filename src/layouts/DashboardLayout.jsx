@@ -1,5 +1,6 @@
 import React from "react";
-import { Link, NavLink, Outlet } from "react-router";
+import { Link, NavLink, Outlet } from "react-router-dom";
+
 import useAuth from "../hooks/useAuth";
 import useRole from "../hooks/useRole";
 import useAxiosSecure from "../hooks/useAxiosSecure";
@@ -23,7 +24,7 @@ import { GiArmorUpgrade } from "react-icons/gi";
 import { IoLogOut } from "react-icons/io5";
 
 const DashboardLayout = () => {
-  const { user, LogOut } = useAuth();
+  const { user, logOut } = useAuth();
   const axiosSecure = useAxiosSecure();
   const { role } = useRole();
 
@@ -38,7 +39,7 @@ const DashboardLayout = () => {
 
   if (isLoading) return <Loading />;
 
-  const handleLogOut = () => LogOut();
+  const handleLogOut = () => logOut();
 
   // Sidebar menu items based on role
   const menuItems = role === "hr" ? [
