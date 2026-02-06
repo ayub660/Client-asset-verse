@@ -1,16 +1,78 @@
-# Asset Verse
+AssetVerse | Corporate Asset Management System
+AssetVerse is a comprehensive B2B digital platform designed to help companies efficiently manage physical assets (laptops, keyboards, chairs, etc.) and track equipment assignments. It streamlines the workflow between HR Managers and Employees, ensuring accountability and reducing administrative overhead.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+🌐 Live URL
+https://asset-verse-clients.netlify.app
 
-Currently, two official plugins are available:
+🚀 Key Features
+Dual-Role Dashboard: Distinct interfaces and functionalities for HR Managers and Employees.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Asset Inventory Management: HR can add, edit, and delete assets, tracking both Returnable and Non-returnable items.
 
-## React Compiler
+Real-time Request System: Employees can request assets from affiliated companies, while HR handles approvals and rejections.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Automatic Affiliation: Seamlessly connects employees to companies upon their first approved asset request.
 
-## Expanding the ESLint configuration
+Secure Authentication: Powered by Firebase with JWT (JSON Web Token) for secure API communication.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Payment Integration: Stripe-powered subscription upgrades for HR Managers to increase employee limits.
+
+
+
+Responsive Design: Fully optimized for mobile, tablet, and desktop using Tailwind CSS and DaisyUI.
+
+🛠️ Technology Stack
+Frontend
+Framework: React.js (Vite)
+
+Styling: Tailwind CSS & DaisyUI
+
+State Management: TanStack Query (React Query)
+
+
+
+Form Handling: React Hook Form
+
+Animations: Framer Motion
+
+Backend
+Runtime: Node.js
+
+Framework: Express.js
+
+Database: MongoDB
+
+Security: JWT (JSON Web Token) & Role-based Middleware
+
+Payment Gateway: Stripe API
+
+📦 Key NPM Packages Used
+firebase: Authentication and hosting configuration.
+
+axios: Handling secure API requests with interceptors.
+
+stripe: Processing secure payments for package upgrades.
+
+react-to-print: Generating PDF/Print views for asset lists.
+
+sweetalert2: For beautiful, interactive user notifications.
+
+dotenv: Managing environment variables securely.
+
+🔮 Upcoming Features (Roadmap)
+Data Visualization: Implementation of Recharts for HR analytics (Asset distribution and request trends).
+
+Notice Board: A system for HR to post company-wide announcements.
+
+Enhanced Profile: Real-time image upload and preview for profile pictures.
+
+
+🔐 Admin/HR Test Credentials
+Email: hhhh@h.com
+
+Password: hhhh@h.com
+
+Employee test creadential 
+Email: x@1.com
+
+Password: x@1.com
