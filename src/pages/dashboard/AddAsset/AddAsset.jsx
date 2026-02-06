@@ -12,6 +12,7 @@ const AddAsset = () => {
   const axiosSecure = useAxiosSecure();
   const navigate = useNavigate();
 
+
   const {
     register,
     handleSubmit,

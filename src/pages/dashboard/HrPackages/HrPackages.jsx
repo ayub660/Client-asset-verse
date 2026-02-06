@@ -13,7 +13,7 @@ const HrPackages = () => {
             .then((res) => {
                 const allPlans = res.data;
 
-                // ডাটাবেজ থেকে লিমিট অনুযায়ী ডাটা খুঁজে বের করা
+
                 const basic = allPlans.find((p) => p.employeeLimit === 5);
                 const pro = allPlans.find((p) => p.employeeLimit === 10);
                 const enterprise = allPlans.find((p) => p.employeeLimit === 15);
@@ -22,7 +22,7 @@ const HrPackages = () => {
                     {
                         ...(basic || {}),
                         _id: basic?._id || "temp_basic",
-                        name: "Basic Plan", // ডাটাবেজে যা আছে হুবহু তাই
+                        name: "Basic Plan",
                         price: 5,
                         employeeLimit: 5,
                         features: ["Manage up to 5 employees", "Basic asset tracking", "Email support"],
@@ -55,7 +55,7 @@ const HrPackages = () => {
     }, [axiosSecure]);
 
     const handleSubscribe = async (plan) => {
-        // ডাবল চেক: যদি ডাটাবেজে আইডি না পাওয়া যায়
+
         if (plan._id.includes("temp")) {
             Swal.fire({
                 title: "Database Sync Required",

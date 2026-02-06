@@ -101,7 +101,7 @@ const RequestAnAsset = () => {
 
       {/* Public Assets Table */}
       <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
-        <table className="table w-full table-zebra">
+        <table className="table table-zebra w-full min-w-[600px] md:min-w-full">
           <thead>
             <tr>
               <th>#</th>
@@ -126,11 +126,11 @@ const RequestAnAsset = () => {
                   <th>{index + 1}</th>
                   <td>
                     <div className="mask mask-squircle h-12 w-12">
-                      <img src={asset.productImage} alt={asset.productName} />
+                      <img src={asset.productImage} alt={asset.productName} className="object-cover h-full w-full" />
                     </div>
                   </td>
                   <td>{asset.productName}</td>
-                  <td>{asset.hrEmail}</td>
+                  <td className="break-words max-w-[120px]">{asset.hrEmail}</td>
                   <td>{asset.productQuantity}</td>
                   <td>{asset.productType}</td>
                   <td>
@@ -156,7 +156,7 @@ const RequestAnAsset = () => {
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-2">My Requests</h3>
         <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
-          <table className="table w-full table-zebra">
+          <table className="table table-zebra w-full min-w-[500px] md:min-w-full">
             <thead>
               <tr>
                 <th>#</th>
@@ -180,14 +180,14 @@ const RequestAnAsset = () => {
                     <th>{idx + 1}</th>
                     <td>
                       <div className="mask mask-squircle h-12 w-12">
-                        <img src={req.assetImage || req.productImage} alt={req.assetName} />
+                        <img src={req.assetImage || req.productImage} alt={req.assetName} className="object-cover h-full w-full" />
                       </div>
                     </td>
                     <td>{req.assetName}</td>
-                    <td>{req.hrEmail}</td>
+                    <td className="break-words max-w-[120px]">{req.hrEmail}</td>
                     <td>{new Date(req.requestDate).toLocaleString()}</td>
                     <td className="capitalize font-semibold">
-                      {req.requestStatus} {/* pending / approved / rejected */}
+                      {req.requestStatus}
                     </td>
                   </tr>
                 ))
@@ -214,7 +214,7 @@ const RequestAnAsset = () => {
               </p>
             </div>
           )}
-          <div className="modal-action flex-col sm:flex-row gap-2">
+          <div className="modal-action flex flex-col sm:flex-row gap-2">
             <button
               className="btn btn-outline w-full sm:w-auto"
               onClick={() => document.getElementById("request_modal").close()}

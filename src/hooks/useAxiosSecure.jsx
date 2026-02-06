@@ -5,11 +5,11 @@ import useAuth from '../hooks/useAuth';
 import { useNavigate } from "react-router-dom";
 
 const axiosSecure = axios.create({
-  baseURL: "http://localhost:3500",
+  baseURL: "https://asset-verse-backend-kappa.vercel.app",
 });
 
 const useAxiosSecure = () => {
-  const { LogOut } = useAuth(); // ✅ AuthProvider এর নাম অনুযায়ী
+  const { LogOut } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,7 +17,8 @@ const useAxiosSecure = () => {
     const reqInterceptor = axiosSecure.interceptors.request.use(
       (config) => {
         const token = localStorage.getItem("access-token");
-        if (token) config.headers.Authorization = `Bearer ${token}`;
+        if (token)
+          config.headers.Authorization = `Bearer ${token}`;
         return config;
       },
       (error) => Promise.reject(error)

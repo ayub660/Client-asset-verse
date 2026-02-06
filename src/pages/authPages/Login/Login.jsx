@@ -59,7 +59,7 @@ const Login = () => {
   // ✅ Google Login (FIXED)
   const handleGoogleLogin = async () => {
     try {
-      const result = await signInWithGoogle();
+      const result = await loginWithGoogle();
       const user = result.user;
 
       toast.success("Login Successful with Google!");

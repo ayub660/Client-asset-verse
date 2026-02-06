@@ -21,7 +21,7 @@ const PaymentSuccess = () => {
                     }
                 } catch (error) {
                     console.error(error);
-                    // error এর বদলে "error" (স্ট্রিং) লিখুন
+
                     Swal.fire("Error", "Failed to update plan", "error");
                     navigate("/dashboard/my-profile");
                 }
