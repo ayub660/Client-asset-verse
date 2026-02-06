@@ -4,6 +4,16 @@ AssetVerse is a comprehensive B2B digital platform designed to help companies ef
 🌐 Live URL
 https://asset-verse-clients.netlify.app
 
+🔐 Admin/HR Test Credentials
+Email: hhhh@h.com
+
+Password: hhhh@h.com
+
+Employee test creadential 
+Email: x@1.com
+
+Password: x@1.com
+
 🚀 Key Features
 Dual-Role Dashboard: Distinct interfaces and functionalities for HR Managers and Employees.
 
@@ -67,12 +77,3 @@ Notice Board: A system for HR to post company-wide announcements.
 Enhanced Profile: Real-time image upload and preview for profile pictures.
 
 
-🔐 Admin/HR Test Credentials
-Email: hhhh@h.com
-
-Password: hhhh@h.com
-
-Employee test creadential 
-Email: x@1.com
-
-Password: x@1.com
