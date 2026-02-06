@@ -9,7 +9,7 @@ Email: hhhh@h.com
 
 Password: hhhh@h.com
 
-Employee test creadential 
+Employee test Credentials
 Email: x@1.com
 
 Password: x@1.com
