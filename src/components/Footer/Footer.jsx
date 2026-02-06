@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    // bg-neutral ব্যাকগ্রাউন্ড এবং সরাসরি !text-white ফোর্স করা হয়েছে
+    // bg-neutral ব্যাকগ্রাউন্ড এবং সরাসরি
     <footer className="bg-neutral !text-white pt-16">
       <div className="footer max-w-7xl mx-auto px-10 pb-12 grid grid-cols-1 md:grid-cols-3 gap-12">
 
-        {/* ১. ব্র্যান্ডিং ও পরিচিতি - এখানে সব টেক্সট white */}
+        {/* ১. ব্র্যান্ডিং ও পরিচিতি  */}
         <aside className="flex flex-col gap-4">
           <Logo />
           {/* text-white !important স্টাইল দিয়ে কনফার্ম করা হলো */}
@@ -26,7 +26,7 @@ const Footer = () => {
           </div>
         </aside>
 
-        {/* ২. কুইক নেভিগেশন - সব লিঙ্ক এখন Pure White */}
+        {/* ২. কুইক নেভিগেশন -*/}
         <nav>
           <h6 className="footer-title opacity-100 font-bold !text-white text-sm mb-6 uppercase tracking-widest border-b border-primary pb-1 inline-block">
             Quick Links
