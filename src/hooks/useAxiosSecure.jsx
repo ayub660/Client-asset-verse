@@ -5,7 +5,7 @@ import useAuth from '../hooks/useAuth';
 import { useNavigate } from "react-router-dom";
 
 const axiosSecure = axios.create({
-  baseURL: "https://asset-verse-backend-kappa.vercel.app",
+  baseURL: "http://localhost:3500",
 });
 
 const useAxiosSecure = () => {

@@ -9,4 +9,4 @@ const Upgrade = () => {
     );
 };
 
-export default Upgrade; // ✅ Default export
+export default Upgrade; 

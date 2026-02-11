@@ -1,4 +1,4 @@
-// src/components/home/Features.jsx
+
 import React from "react";
 import Feature1 from "../../assets/images/feature1.png";
 import Feature2 from "../../assets/images/feature2.png";

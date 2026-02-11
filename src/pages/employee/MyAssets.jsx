@@ -10,4 +10,4 @@ const MyAssets = () => {
     );
 };
 
-export default MyAssets;   // ✅ default export দরকার
+export default MyAssets;  

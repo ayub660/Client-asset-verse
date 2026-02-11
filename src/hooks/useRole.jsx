@@ -8,7 +8,8 @@ const useRole = () => {
 
   const { data: role = "employee", isLoading } = useQuery({
     queryKey: ["user-role", user?.email],
-    enabled: !loading && !!user?.email && !!localStorage.getItem("access-token"),
+    enabled: !loading && !!user?.email,
+    // && !!localStorage.getItem("access-token"),
     queryFn: async () => {
       try {
         const email = encodeURIComponent(user.email);

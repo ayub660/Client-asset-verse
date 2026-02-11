@@ -1,4 +1,3 @@
-// src/pages/public/NotFound.jsx
 import React from "react";
 
 const NotFound = () => {
@@ -10,4 +9,4 @@ const NotFound = () => {
     );
 };
 
-export default NotFound;  // ✅ default export
+export default NotFound; 
