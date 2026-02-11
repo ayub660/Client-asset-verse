@@ -117,6 +117,7 @@ const AuthProvider = ({ children }) => {
             setUser(null);
             setRole(null);
             localStorage.removeItem("userRole");
+            localStorage.removeItem("access-token");
 
             Swal.fire({ icon: "success", title: "Logged Out", showConfirmButton: false, timer: 1200 });
         } catch (error) {
