@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
 import Loading from "../../../components/Loading/Loading";
-import pagination from "../../../components/common/Pagination"
+
 import Pagination from "../../../components/common/Pagination"
 import { toast } from "react-toastify";
 import { jsPDF } from "jspdf";

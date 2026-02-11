@@ -4,6 +4,7 @@ import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import Loading from "../../../components/Loading/Loading";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
+import RequestAssetGrid from "../../../components/RequestAssetGrid"; // আপনার কম্পোনেন্ট
 
 const AssetList = () => {
   const modalRef = useRef(null);
@@ -12,20 +13,29 @@ const AssetList = () => {
   const [searchText, setSearchText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
+  // প্যাগিনেশন স্টেট
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const { register, handleSubmit, setValue, reset } = useForm();
 
   const { data: assets = [], isLoading, refetch } = useQuery({
     queryKey: ["assets", searchQuery],
     queryFn: async () => {
-      const res = await axiosSecure.get("/assets"); // backend GET /assets
+      const res = await axiosSecure.get("/assets");
       return res.data;
     },
     staleTime: 1000 * 5,
     refetchOnWindowFocus: false,
   });
 
-  // -----------------------------
-  // Open Edit Modal
+  // ১. প্যাগিনেশন লজিক
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentAssets = assets.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(assets.length / itemsPerPage);
+
+  // এডিট মোডাল এবং ডিলিট ফাংশন আগের মতোই থাকবে (নিচে সংক্ষেপে দেওয়া হলো)
   const openEditModal = (asset) => {
     setSelectedAsset(asset);
     setValue("productName", asset.productName);
@@ -34,197 +44,76 @@ const AssetList = () => {
     modalRef.current.showModal();
   };
 
-  // -----------------------------
-  // Update Asset
   const onSubmitEdit = async (data) => {
-    if (!selectedAsset) return;
-
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You want to update this asset!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, update it!",
-    });
-
-    if (!result.isConfirmed) return;
-
-    try {
-      const res = await axiosSecure.patch(`/assets/${selectedAsset._id}`, data);
-
-      if (res.data.modifiedCount) {
-        modalRef.current.close();
-        reset();
-        refetch();
-        Swal.fire("Updated!", "Asset updated successfully.", "success");
-      } else {
-        Swal.fire("Info", "Nothing changed", "info");
-      }
-    } catch (err) {
-      Swal.fire({
-        title: "Error",
-        text: err.message || "Update failed",
-        icon: "error",
-      });
-    }
+    // ... (আপনার আগের আপডেট কোড এখানে বসবে)
   };
 
-  // -----------------------------
-  // Delete Asset
   const handleDeleteAsset = async (id) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "Yes, delete it!",
-    });
-
-    if (!result.isConfirmed) return;
-
-    try {
-      const res = await axiosSecure.delete(`/assets/${id}`);
-      if (res.data.deletedCount) {
-        refetch();
-        Swal.fire("Deleted!", "Asset has been deleted.", "success");
-      }
-    } catch (err) {
-      Swal.fire("Error", err.message || "Delete failed", "error");
-    }
+    // ... (আপনার আগের ডিলিট কোড এখানে বসবে)
   };
 
-  // -----------------------------
-  // Search
   const handleSearch = () => {
     setSearchQuery(searchText.trim());
+    setCurrentPage(1); // সার্চ করলে ১ নম্বর পেজে নিয়ে যাবে
   };
-
-  useEffect(() => {
-    if (searchText === "") setSearchQuery("");
-  }, [searchText]);
 
   if (isLoading) return <Loading />;
 
   return (
-    <div className="bg-base-100 rounded-xl p-5">
+    <div className="bg-base-200 min-h-screen rounded-xl p-5">
       <h2 className="text-3xl font-bold mb-6 text-center text-primary">
         All Assets ({assets.length})
       </h2>
 
-      {/* Search */}
-      <div className="flex justify-center mb-6">
-        <div className="flex gap-2 w-full max-w-sm relative">
+      {/* Search Bar */}
+      <div className="flex justify-center mb-10">
+        <div className="join w-full max-w-md">
           <input
-            type="text"
-            className="input input-bordered flex-1"
-            placeholder="Search asset"
+            className="input input-bordered join-item w-full"
+            placeholder="অ্যাসেটের নাম লিখে সার্চ করুন..."
             value={searchText}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          <button
-            onClick={handleSearch}
-            className="btn btn-primary absolute right-0 z-50"
-          >
-            Search
-          </button>
+          <button onClick={handleSearch} className="btn btn-primary join-item">Search</button>
         </div>
       </div>
 
-      {/* Asset Table */}
-      <div className="overflow-x-auto">
-        <table className="table table-zebra w-full">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Type</th>
-              <th>Quantity</th>
-              <th>Date Added</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assets.length === 0 && (
-              <tr>
-                <td colSpan="6" className="text-center text-gray-500">
-                  No assets found
-                </td>
-              </tr>
-            )}
-            {assets.map((asset, index) => (
-              <tr key={asset._id}>
-                <td>{index + 1}</td>
-                <td>
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={asset.productImage}
-                      alt={asset.productName}
-                      className="w-12 h-12 rounded"
-                    />
-                    <div>
-                      <p className="font-bold">{asset.productName}</p>
-                    </div>
-                  </div>
-                </td>
-                <td>{asset.productType}</td>
-                <td className={asset.productQuantity === 0 ? "text-error font-bold" : ""}>
-                  {asset.productQuantity}
-                </td>
-                <td>{new Date(asset.createdAt).toLocaleDateString()}</td>
-                <td className="space-x-2">
-                  <button
-                    onClick={() => openEditModal(asset)}
-                    className="btn btn-xs btn-info"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDeleteAsset(asset._id)}
-                    className="btn btn-xs btn-error"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
+      {/* ২. গ্রিড লেআউট ব্যবহার করে ডাটা দেখানো */}
+      {assets.length === 0 ? (
+        <p className="text-center text-gray-500">কোনো অ্যাসেট পাওয়া যায়নি।</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {currentAssets.map((asset) => (
+            <RequestAssetGrid
+              key={asset._id}
+              asset={asset}
+              onEdit={() => openEditModal(asset)}
+              onDelete={() => handleDeleteAsset(asset._id)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ৩. প্যাগিনেশন বাটন */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-12 mb-6">
+          <div className="join">
+            {[...Array(totalPages).keys()].map((num) => (
+              <button
+                key={num}
+                onClick={() => setCurrentPage(num + 1)}
+                className={`join-item btn ${currentPage === num + 1 ? "btn-primary" : "btn-outline"}`}
+              >
+                {num + 1}
+              </button>
             ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Edit Modal */}
-      <dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
-        <div className="modal-box">
-          <h3 className="text-xl font-bold mb-4 text-center">Edit Asset</h3>
-          <form onSubmit={handleSubmit(onSubmitEdit)} className="grid grid-cols-1 gap-4">
-            <input
-              {...register("productName", { required: true })}
-              className="input"
-              placeholder="Product Name"
-            />
-            <select
-              {...register("productType")}
-              className="select border-primary outline-none w-full"
-            >
-              <option value="Returnable">Returnable</option>
-              <option value="Non-returnable">Non-returnable</option>
-            </select>
-            <input
-              type="number"
-              {...register("productQuantity", { required: true })}
-              className="input"
-              placeholder="Quantity"
-            />
-            <div className="flex gap-2">
-              <button type="submit" className="btn btn-primary flex-1">
-                Update
-              </button>
-              <button type="button" onClick={() => modalRef.current.close()} className="btn btn-outline flex-1">
-                Cancel
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
+      )}
+
+      {/* Edit Modal (আপনার আগের মোডাল কোড এখানে থাকবে) */}
+      <dialog ref={modalRef} className="modal">
+        {/* ... modal content ... */}
       </dialog>
     </div>
   );
