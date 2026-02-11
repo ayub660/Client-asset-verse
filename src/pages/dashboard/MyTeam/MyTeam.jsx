@@ -1,26 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
+import useAuth from "../../../hooks/useAuth";
+import Loading from "../../../components/Loading/Loading";
 
 const MyTeam = () => {
     const axiosSecure = useAxiosSecure();
-    const [selectedCompany, setSelectedCompany] = useState("");
+    const { user } = useAuth(); // লগইন করা ইউজারের ডাটা নিতে
 
-    const { data: companies = [] } = useQuery({
-        queryKey: ["myCompanies"],
-        queryFn: async () => {
-            const res = await axiosSecure.get("/companies/my");
-            return res.data;
-        },
-    });
-
+    // সরাসরি টিমের ডাটা ফেচ করা
     const { data: team = [], isLoading } = useQuery({
-        queryKey: ["team", selectedCompany],
-        enabled: !!selectedCompany,
+        queryKey: ["team", user?.email],
+        enabled: !!user?.email,
         queryFn: async () => {
-            const res = await axiosSecure.get(
-                `/employees/company/${selectedCompany}`
-            );
+            const res = await axiosSecure.get(`/team/${user?.email}`);
             return res.data;
         },
     });
@@ -30,65 +23,48 @@ const MyTeam = () => {
         (p) => p.dateOfBirth && new Date(p.dateOfBirth).getMonth() === currentMonth
     );
 
+    if (isLoading) return <Loading />;
+
     return (
         <div className="p-6 space-y-10 max-w-7xl mx-auto">
             {/* Header */}
-            <h2 className="text-2xl font-bold tracking-tight">My Team</h2>
-            <div className="flex flex-col lg:flex-row justify-center lg:justify-end items-center">
-
-                {/* Company Selector */}
-                <div className="w-full sm:w-64">
-                    <select
-                        className="select select-bordered w-full"
-                        value={selectedCompany}
-                        onChange={(e) => setSelectedCompany(e.target.value)}
-                    >
-                        <option value="">Select Company</option>
-                        {companies.map((c, i) => (
-                            <option key={i} value={c.hrEmail}>
-                                {c.companyName}
-                            </option>
-                        ))}
-                    </select>
+            <div className="flex justify-between items-center border-b pb-4">
+                <h2 className="text-3xl font-bold tracking-tight text-primary">My Team Members</h2>
+                <div className="badge badge-primary badge-lg p-4 font-bold uppercase">
+                    {team[0]?.companyName || "No Company"}
                 </div>
             </div>
 
             {/* Team Section */}
             <div>
-                {!selectedCompany && (
-                    <div className="text-center py-16 opacity-60">
-                        Select a company to view team members
+                {team.length === 0 ? (
+                    <div className="text-center py-20 bg-base-100 rounded-3xl shadow">
+                        <p className="text-xl opacity-60 italic">You are not affiliated with any company yet.</p>
                     </div>
-                )}
-
-                {isLoading && selectedCompany && (
-                    <div className="text-center py-16">Loading team...</div>
-                )}
-
-                {!isLoading && selectedCompany && team.length === 0 && (
-                    <div className="text-center py-16 opacity-60">
-                        No employees found for this company
-                    </div>
-                )}
-
-                {!isLoading && team.length > 0 && (
+                ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {team.map((member) => (
                             <div
                                 key={member._id}
-                                className="bg-base-100 rounded-xl shadow hover:shadow-lg transition-all duration-300 p-5 flex flex-col items-center text-center"
+                                className="bg-base-100 rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 p-6 flex flex-col items-center text-center border border-primary/5"
                             >
-                                <img
-                                    src={member.photo || "/avatar.png"}
-                                    alt={member.name}
-                                    className="w-24 h-24 rounded-full object-cover border"
-                                />
+                                <div className="relative">
+                                    <img
+                                        src={member.photo || "https://i.ibb.co/PNG-placeholder.png"}
+                                        alt={member.name}
+                                        className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
+                                        onError={(e) => e.target.src = "https://i.ibb.co/PNG-placeholder.png"}
+                                    />
+                                    {member.role === 'hr' && (
+                                        <span className="absolute bottom-0 right-0 badge badge-primary font-bold">HR</span>
+                                    )}
+                                </div>
 
-                                <h3 className="mt-4 font-semibold">{member.name}</h3>
-                                <p className="text-sm opacity-70">{member.email}</p>
+                                <h3 className="mt-4 font-bold text-lg">{member.name}</h3>
+                                <p className="text-sm opacity-70 break-all">{member.email}</p>
 
-                                <span className="badge badge-outline mt-3">
-                                    {member.position || "Employee"}
+                                <span className="badge badge-ghost mt-3 capitalize">
+                                    {member.role === 'hr' ? "Admin" : (member.position || "Employee")}
                                 </span>
                             </div>
                         ))}
@@ -96,26 +72,29 @@ const MyTeam = () => {
                 )}
             </div>
 
-            {/* Birthdays */}
+            {/* Birthdays Section */}
             {upcomingBirthdays.length > 0 && (
-                <div>
-                    <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                        🎂 Upcoming Birthdays
+                <div className="bg-primary/5 p-8 rounded-3xl border border-primary/10">
+                    <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                        🎂 Upcoming Birthdays (This Month)
                     </h3>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         {upcomingBirthdays.map((p) => (
                             <div
                                 key={p._id}
-                                className="p-4 bg-base-200 rounded-lg shadow flex justify-between items-center"
+                                className="p-5 bg-base-100 rounded-xl shadow-sm flex justify-between items-center border border-primary/10"
                             >
-                                <div>
-                                    <p className="font-semibold">{p.name}</p>
-                                    <p className="text-sm opacity-70">
-                                        {new Date(p.dateOfBirth).toLocaleDateString()}
-                                    </p>
+                                <div className="flex items-center gap-4">
+                                    <img src={p.photo} className="w-10 h-10 rounded-full" alt="" />
+                                    <div>
+                                        <p className="font-bold">{p.name}</p>
+                                        <p className="text-sm opacity-70">
+                                            {new Date(p.dateOfBirth).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
+                                        </p>
+                                    </div>
                                 </div>
-                                <span className="badge badge-success">This Month</span>
+                                <span className="badge badge-success badge-sm">Active</span>
                             </div>
                         ))}
                     </div>
