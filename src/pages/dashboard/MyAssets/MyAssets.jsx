@@ -5,6 +5,9 @@ import useAuth from "../../../hooks/useAuth";
 import Loading from "../../../components/Loading/Loading";
 import { toast } from "react-toastify";
 import { Helmet } from "react-helmet";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 const MyAssets = () => {
     const { user } = useAuth();
@@ -18,12 +21,10 @@ const MyAssets = () => {
     const { data: requests = [], isLoading, refetch } = useQuery({
         queryKey: ["my-assets-requests", user?.email],
         queryFn: async () => {
-
             const res = await axiosSecure.get("/asset-requests/employee");
             return res.data;
         },
     });
-
 
     const filteredRequests = requests.filter((req) => {
         const assetName = (req.assetName || req.productName || "").toLowerCase();
@@ -38,11 +39,44 @@ const MyAssets = () => {
         return matchesSearch && matchesStatus && matchesType;
     });
 
+    // --- PDF Print Function ---
+    const handlePrintPDF = (req) => {
+        const doc = new jsPDF();
 
+        // Title
+        doc.setFontSize(20);
+        doc.text("Asset Request Report", 14, 22);
+
+        doc.setFontSize(10);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+
+        // Table Data
+        const tableColumn = ["Field", "Information"];
+        const tableRows = [
+            ["Asset Name", req.assetName || req.productName],
+            ["Asset Type", req.assetType || req.productType],
+            ["HR Contact", req.hrEmail || "Company HR"],
+            ["Request Date", new Date(req.requestDate).toLocaleDateString()],
+            ["Status", req.status || req.requestStatus || "pending"],
+        ];
+
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 40,
+            theme: 'grid',
+            headStyles: { fillColor: [59, 130, 246] },
+        });
+
+        doc.save(`Asset_Report_${req._id}.pdf`);
+        toast.success("PDF Downloaded!");
+    };
     const handleCancelRequest = async (id) => {
         try {
             const res = await axiosSecure.delete(`/requests/${id}`);
-            if (res.data.deletedCount > 0) {
+
+            if (res.status === 200 || res.data.deletedCount > 0) {
                 toast.success("Request cancelled successfully!");
                 refetch();
             }
@@ -62,7 +96,7 @@ const MyAssets = () => {
                     My Requested Assets
                 </h2>
 
-                {/* --- Search and Filter Bar (বড় ডিজাইনের) --- */}
+                {/* --- Search and Filter Bar --- */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                     <div className="form-control">
                         <label className="label font-bold text-gray-600">Search Assets</label>
@@ -137,13 +171,14 @@ const MyAssets = () => {
                                             </td>
                                             <td>{new Date(req.requestDate).toLocaleDateString()}</td>
                                             <td>
-                                                <span className={`badge ${req.status === 'approved' ? 'badge-success' : 'badge-warning'}`}>
-                                                    {req.status || req.requestStatus || "pending"}
+                                                <span className={`badge ${currentStatus === 'approved' ? 'badge-success' : currentStatus === 'rejected' ? 'badge-error' : 'badge-warning'}`}>
+                                                    {currentStatus || "pending"}
                                                 </span>
                                             </td>
                                             <td className="text-center">
                                                 <div className="flex justify-center gap-2">
 
+                                                    {/* Cancel Button */}
                                                     {currentStatus === "pending" && (
                                                         <button
                                                             onClick={() => handleCancelRequest(req._id)}
@@ -153,13 +188,22 @@ const MyAssets = () => {
                                                         </button>
                                                     )}
 
+                                                    {/* Print PDF Button (Only for Approved) */}
+                                                    {currentStatus === "approved" && (
+                                                        <button
+                                                            onClick={() => handlePrintPDF(req)}
+                                                            className="btn btn-xs btn-outline btn-info px-4"
+                                                        >
+                                                            Print PDF
+                                                        </button>
+                                                    )}
 
+                                                    {/* Return Button (Placeholder for now) */}
                                                     {currentStatus === "approved" && currentType === "Returnable" && (
                                                         <button className="btn btn-xs btn-primary px-4">
                                                             Return
                                                         </button>
                                                     )}
-
 
                                                     {(currentStatus === "rejected" || (currentStatus === "approved" && currentType === "Non-returnable")) && (
                                                         <span className="text-xs text-gray-400 italic">Processed</span>
