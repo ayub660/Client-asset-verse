@@ -3,153 +3,183 @@ import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
 import Loading from "../../../components/Loading/Loading";
-
-import Pagination from "../../../components/common/Pagination"
 import { toast } from "react-toastify";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+import { Helmet } from "react-helmet";
 
 const MyAssets = () => {
     const { user } = useAuth();
     const axiosSecure = useAxiosSecure();
-    const [searchText, setSearchText] = useState("");
-    const [filterStatus, setFilterStatus] = useState("");
-    const [filterType, setFilterType] = useState("");
-    const [currentPage, setCurrentPage] = useState(0);
-    const limit = 10;
 
-    const { data: requestData = { requests: [], total: 0 }, isLoading, refetch } = useQuery({
-        queryKey: ["my-assets", user?.email, searchText, filterStatus, filterType, currentPage],
+    // --- Filter & Search States ---
+    const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
+    const [typeFilter, setTypeFilter] = useState("");
+
+    const { data: requests = [], isLoading, refetch } = useQuery({
+        queryKey: ["my-assets-requests", user?.email],
         queryFn: async () => {
-            const res = await axiosSecure.get(
-                `/my-requests?email=${user?.email}&search=${searchText}&status=${filterStatus}&type=${filterType}&limit=${limit}&skip=${currentPage * limit}`
-            );
+
+            const res = await axiosSecure.get("/asset-requests/employee");
             return res.data;
         },
     });
 
-    const requests = requestData.requests || [];
-    const totalPages = Math.ceil((requestData.total || 0) / limit);
 
-    // ১. রিকোয়েস্ট ক্যানসেল করা
-    const handleCancel = async (id) => {
-        if (!window.confirm("আপনি কি নিশ্চিত যে এটি ক্যানসেল করতে চান?")) return;
+    const filteredRequests = requests.filter((req) => {
+        const assetName = (req.assetName || req.productName || "").toLowerCase();
+        const matchesSearch = assetName.includes(search.toLowerCase());
+
+        const currentStatus = req.status || req.requestStatus;
+        const matchesStatus = statusFilter ? currentStatus === statusFilter : true;
+
+        const currentType = req.assetType || req.productType;
+        const matchesType = typeFilter ? currentType === typeFilter : true;
+
+        return matchesSearch && matchesStatus && matchesType;
+    });
+
+
+    const handleCancelRequest = async (id) => {
         try {
             const res = await axiosSecure.delete(`/requests/${id}`);
             if (res.data.deletedCount > 0) {
-                toast.success("সফলভাবে ক্যানসেল করা হয়েছে!");
+                toast.success("Request cancelled successfully!");
                 refetch();
             }
         } catch (err) {
-            toast.error("ক্যানসেল করা যায়নি।");
+            toast.error("Failed to cancel request.");
         }
-    };
-
-    // ২. অ্যাসেট রিটার্ন করা
-    const handleReturn = async (id) => {
-        try {
-            const res = await axiosSecure.patch(`/requests/return/${id}`);
-            if (res.data.modifiedCount > 0) {
-                toast.success("অ্যাসেটটি রিটার্ন করা হয়েছে!");
-                refetch();
-            }
-        } catch (err) {
-            toast.error("রিটার্ন প্রসেস ব্যর্থ হয়েছে।");
-        }
-    };
-
-    // ৩. পিডিএফ জেনারেট করা (অ্যাসাইনমেন্টের বোনাস/মাস্ট কাজ)
-    const generatePDF = (req) => {
-        const doc = new jsPDF();
-        doc.setFontSize(18);
-        doc.text("Asset Trust - Asset Receipt", 14, 22);
-
-        doc.setFontSize(11);
-        doc.text(`Company: ${req.companyName || "AssetVerse"}`, 14, 32);
-        doc.text(`Employee Name: ${user?.displayName}`, 14, 38);
-        doc.text(`Print Date: ${new Date().toLocaleDateString()}`, 14, 44);
-
-        autoTable(doc, {
-            startY: 50,
-            head: [['Field', 'Details']],
-            body: [
-                ['Asset Name', req.assetName],
-                ['Asset Type', req.assetType],
-                ['Request Date', new Date(req.requestDate).toLocaleDateString()],
-                ['Approval Date', req.approvalDate ? new Date(req.approvalDate).toLocaleDateString() : 'N/A'],
-                ['Status', req.status],
-            ],
-        });
-
-        doc.text("Note: This is a computer-generated document.", 14, doc.lastAutoTable.finalY + 10);
-        doc.save(`${req.assetName}_receipt.pdf`);
     };
 
     if (isLoading) return <Loading />;
 
     return (
-        <div className="p-6">
-            <h2 className="text-2xl font-bold mb-6">আমার রিকোয়েস্ট করা অ্যাসেটসমূহ</h2>
+        <div className="p-6 bg-gray-50 min-h-screen font-sans">
+            <Helmet><title>My Assets | AssetVerse</title></Helmet>
 
-            {/* ফিল্টার সেকশন */}
-            <div className="flex gap-4 mb-6">
-                <input
-                    type="text"
-                    placeholder="নাম দিয়ে সার্চ..."
-                    className="input input-bordered w-full max-w-xs"
-                    onChange={(e) => setSearchText(e.target.value)}
-                />
-                <select className="select select-bordered" onChange={(e) => setFilterStatus(e.target.value)}>
-                    <option value="">সব স্ট্যাটাস</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                </select>
-            </div>
+            <div className="max-w-7xl mx-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 className="text-3xl font-extrabold mb-8 text-center text-gray-800">
+                    My Requested Assets
+                </h2>
 
-            <div className="overflow-x-auto">
-                <table className="table table-zebra w-full shadow-md border">
-                    <thead className="bg-gray-100">
-                        <tr>
-                            <th>নাম</th>
-                            <th>টাইপ</th>
-                            <th>স্ট্যাটাস</th>
-                            <th>অ্যাকশন</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {requests.map((req) => (
-                            <tr key={req._id}>
-                                <td>{req.assetName}</td>
-                                <td>{req.assetType}</td>
-                                <td>
-                                    <span className={`badge ${req.status === 'pending' ? 'badge-warning' : 'badge-success'}`}>
-                                        {req.status}
-                                    </span>
-                                </td>
-                                <td className="flex gap-2">
-                                    {req.status === 'pending' && (
-                                        <button onClick={() => handleCancel(req._id)} className="btn btn-error btn-xs text-white">Cancel</button>
-                                    )}
-                                    {req.status === 'approved' && (
-                                        <button onClick={() => generatePDF(req)} className="btn btn-neutral btn-xs">Print PDF</button>
-                                    )}
-                                    {req.status === 'approved' && req.assetType === 'Returnable' && (
-                                        <button
-                                            disabled={req.isReturned}
-                                            onClick={() => handleReturn(req._id)}
-                                            className="btn btn-primary btn-xs"
-                                        >
-                                            {req.isReturned ? "Returned" : "Return"}
-                                        </button>
-                                    )}
-                                </td>
+                {/* --- Search and Filter Bar (বড় ডিজাইনের) --- */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div className="form-control">
+                        <label className="label font-bold text-gray-600">Search Assets</label>
+                        <input
+                            type="text"
+                            placeholder="Type asset name..."
+                            className="input input-bordered w-full focus:ring-2 ring-primary/20"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="form-control">
+                        <label className="label font-bold text-gray-600">Filter by Status</label>
+                        <select
+                            className="select select-bordered w-full"
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <div className="form-control">
+                        <label className="label font-bold text-gray-600">Asset Type</label>
+                        <select
+                            className="select select-bordered w-full"
+                            value={typeFilter}
+                            onChange={(e) => setTypeFilter(e.target.value)}
+                        >
+                            <option value="">All Types</option>
+                            <option value="Returnable">Returnable</option>
+                            <option value="Non-returnable">Non-returnable</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* --- Table Section --- */}
+                <div className="overflow-x-auto rounded-xl border border-gray-200">
+                    <table className="table w-full">
+                        <thead className="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th className="py-4">Asset Name</th>
+                                <th>Type</th>
+                                <th>HR Contact</th>
+                                <th>Request Date</th>
+                                <th>Status</th>
+                                <th className="text-center">Action</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {filteredRequests.length > 0 ? (
+                                filteredRequests.map((req) => {
+                                    const currentStatus = req.status || req.requestStatus;
+                                    const currentType = req.assetType || req.productType;
 
-            <Pagination totalPages={totalPages} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                                    return (
+                                        <tr key={req._id} className="hover:bg-gray-50 transition-all">
+                                            <td className="font-bold text-gray-800">
+                                                {req.assetName || req.productName}
+                                            </td>
+                                            <td>
+                                                <span className="badge badge-ghost font-medium">
+                                                    {currentType}
+                                                </span>
+                                            </td>
+                                            <td className="text-blue-600 font-medium">
+                                                {req.hrEmail || "Company HR"}
+                                            </td>
+                                            <td>{new Date(req.requestDate).toLocaleDateString()}</td>
+                                            <td>
+                                                <span className={`badge ${req.status === 'approved' ? 'badge-success' : 'badge-warning'}`}>
+                                                    {req.status || req.requestStatus || "pending"}
+                                                </span>
+                                            </td>
+                                            <td className="text-center">
+                                                <div className="flex justify-center gap-2">
+
+                                                    {currentStatus === "pending" && (
+                                                        <button
+                                                            onClick={() => handleCancelRequest(req._id)}
+                                                            className="btn btn-xs btn-error text-white px-4"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    )}
+
+
+                                                    {currentStatus === "approved" && currentType === "Returnable" && (
+                                                        <button className="btn btn-xs btn-primary px-4">
+                                                            Return
+                                                        </button>
+                                                    )}
+
+
+                                                    {(currentStatus === "rejected" || (currentStatus === "approved" && currentType === "Non-returnable")) && (
+                                                        <span className="text-xs text-gray-400 italic">Processed</span>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-20 text-gray-400 italic font-medium">
+                                        No assets matching your request found.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 };
