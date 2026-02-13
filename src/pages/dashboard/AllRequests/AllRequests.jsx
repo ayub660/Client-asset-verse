@@ -4,21 +4,34 @@ import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import Loading from "../../../components/Loading/Loading";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
+import { useNavigate } from 'react-router-dom';
+import useAuth from "../../../hooks/useAuth";
 
 const AllRequests = () => {
   const axiosSecure = useAxiosSecure();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Fetch all HR requests
+  // ১. Fetch HR profile (Limit check)
+  const { data: hrProfile, refetch: refetchProfile } = useQuery({
+    queryKey: ['hr-profile', user?.email],
+    enabled: !!user?.email,
+    queryFn: async () => {
+      const res = await axiosSecure.get(`/check-hr/${user?.email}`);
+      return res.data;
+    }
+  });
+
+  // ২. Fetch all HR requests
   const { data: requests = [], isLoading, refetch } = useQuery({
     queryKey: ["hr-requests"],
     queryFn: async () => {
       const res = await axiosSecure.get("/asset-requests/hr");
-      // Newest requests first (Sorting)
       return res.data.sort((a, b) => new Date(b.requestDate) - new Date(a.requestDate));
     },
   });
@@ -32,19 +45,47 @@ const AllRequests = () => {
   // Approve request
   const handleApprove = async (id) => {
     try {
-      // Backend should check stock and decrement quantity
       const res = await axiosSecure.post(`/requests/${id}/approve`);
-      if (res.data) {
-        toast.success("Request approved and stock updated!");
+      if (res.data.success) {
+        Swal.fire({
+          title: "Approved!",
+          text: "The request has been approved and member count updated.",
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false
+        });
+
+
         queryClient.invalidateQueries(["hr-requests"]);
-        queryClient.invalidateQueries(["assets"]); // Refresh asset list stock
+        queryClient.invalidateQueries(["assets"]);
         refetch();
+        refetchProfile();
       }
     } catch (err) {
-      // Handles the 400 Bad Request / No Stock error
       const msg = err.response?.data?.message || "Approve failed";
-      toast.error(msg);
-      console.error("Approve Error:", err);
+
+      if (msg.includes("limit") || msg.includes("upgrade")) {
+        Swal.fire({
+          title: "Limit Reached!",
+          text: msg,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Upgrade Package",
+          cancelButtonText: "Close"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate("/dashboard/upgrade-package-hr");
+          }
+        });
+      } else {
+        Swal.fire({
+          title: "Error!",
+          text: msg,
+          icon: "error"
+        });
+      }
     }
   };
 
@@ -53,12 +94,12 @@ const AllRequests = () => {
     try {
       await axiosSecure.patch(`/requests/${id}/reject`);
       toast.success("Request rejected");
-      queryClient.invalidateQueries(["hr-requests"]);
       refetch();
     } catch (err) {
       toast.error("Reject failed");
     }
   };
+
 
   // Delete request
   const handleDelete = async (id) => {
@@ -73,18 +114,21 @@ const AllRequests = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axiosSecure.delete(`/requests/${id}`);
-          toast.success("Deleted successfully");
-          queryClient.invalidateQueries(["hr-requests"]);
-          refetch();
+          const res = await axiosSecure.delete(`/requests/${id}`);
+          if (res.data.deletedCount > 0) {
+            toast.success("Deleted successfully");
+
+            queryClient.invalidateQueries(["hr-requests"]);
+            queryClient.invalidateQueries(["hr-profile"]);
+            refetch();
+          }
         } catch (err) {
-          toast.error("Delete failed");
+
+          toast.error(err.response?.data?.message || "Delete failed");
         }
       }
     });
   };
-
-  if (isLoading) return <Loading />;
 
   return (
     <div className="p-6 bg-base-200 min-h-screen">
@@ -92,6 +136,28 @@ const AllRequests = () => {
         <h2 className="text-3xl font-bold mb-6 text-center text-primary">
           Manage All Asset Requests ({requests.length})
         </h2>
+
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 bg-blue-50 p-5 rounded-xl border border-blue-100 shadow-sm">
+          <div className="flex flex-col justify-center">
+            <h3 className="text-blue-800 font-bold text-lg">Member Limit Status</h3>
+            <p className="text-gray-600 mt-1">
+              Current Members: <span className="font-bold text-blue-600">{hrProfile?.currentEmployees || 0}</span> / {hrProfile?.packageLimit || 0}
+            </p>
+          </div>
+          <div className="flex flex-col items-end justify-center">
+            <div className="w-full max-w-xs text-right">
+              <progress
+                className="progress progress-primary w-full h-3"
+                value={hrProfile?.currentEmployees || 0}
+                max={hrProfile?.packageLimit || 1}>
+              </progress>
+              <p className="text-xs text-gray-500 mt-1">
+                {(hrProfile?.packageLimit || 0) - (hrProfile?.currentEmployees || 0)} slots remaining
+              </p>
+            </div>
+          </div>
+        </div>
 
         {requests.length === 0 ? (
           <div className="text-center py-20 text-gray-500 font-medium">No requests found at the moment.</div>
@@ -116,7 +182,6 @@ const AllRequests = () => {
                       <div className="flex items-center gap-3">
                         <div className="avatar">
                           <div className="mask mask-squircle w-12 h-12 bg-gray-200">
-                            {/* Handled potential placeholder DNS error */}
                             <img
                               src={req.assetImage || "https://placehold.co/100x100?text=Asset"}
                               alt={req.assetName}
@@ -137,7 +202,7 @@ const AllRequests = () => {
                     <td className="text-sm">{new Date(req.requestDate).toLocaleDateString()}</td>
                     <td>
                       <span className={`badge badge-sm font-bold p-3 uppercase ${req.requestStatus === "pending" ? "badge-warning" :
-                          req.requestStatus === "approved" ? "badge-success text-white" : "badge-error text-white"
+                        req.requestStatus === "approved" ? "badge-success text-white" : "badge-error text-white"
                         }`}>
                         {req.requestStatus}
                       </span>
@@ -164,7 +229,7 @@ const AllRequests = () => {
           </div>
         )}
 
-        {/* Improved Pagination Controls */}
+        {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex justify-center mt-10">
             <div className="join border border-primary/20">
@@ -173,7 +238,7 @@ const AllRequests = () => {
                   key={num}
                   onClick={() => {
                     setCurrentPage(num + 1);
-                    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top on page change
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   className={`join-item btn btn-sm px-4 ${currentPage === num + 1 ? "btn-primary text-white" : "btn-ghost"}`}
                 >

@@ -28,8 +28,8 @@ const RegisterEmployee = () => {
         data.name,
         data.email,
         data.password,
-        data.photoURL, // profileImage
-        "employee" // role
+        data.photoURL,
+        "employee"
       );
 
       if (!result?.user) throw new Error("Firebase registration failed");
@@ -47,10 +47,18 @@ const RegisterEmployee = () => {
       // 3️⃣ Save in backend
       const res = await axios.post("/register/employee", employeeInfo);
 
-      if (!res.data?.token) throw new Error("MongoDB user save failed");
+
+      if (res.data?.token) {
+        localStorage.setItem("access-token", res.data.token);
+      } else {
+        throw new Error("Token not received from server");
+      }
 
       toast.success("Welcome to AssetVerse 🎉");
-      navigate(location?.state || "/");
+
+
+      navigate("/dashboard");
+
     } catch (error) {
       console.error("Employee Register Error:", error);
       toast.error(

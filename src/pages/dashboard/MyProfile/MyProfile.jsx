@@ -10,7 +10,7 @@ const MyProfile = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
 
-  // Fetch profile data
+  // Fetch profile data - এখান থেকেই আমরা packageLimit এবং currentEmployees পাবো
   const { data: profile = {}, isLoading, refetch } = useQuery({
     queryKey: ["my-profile", user?.email],
     enabled: !!user?.email,
@@ -29,7 +29,6 @@ const MyProfile = () => {
     },
   });
 
-  // আপডেট হ্যান্ডলার
   const handleUpdate = async (e) => {
     e.preventDefault();
     const name = e.target.name.value;
@@ -38,7 +37,6 @@ const MyProfile = () => {
 
     const updateInfo = { name, dateOfBirth };
 
-    // রোল অনুযায়ী ফিল্ড সেট করা
     if (profile.role === "hr") {
       updateInfo.companyLogo = imageUrl;
     } else {
@@ -48,7 +46,7 @@ const MyProfile = () => {
     try {
       const res = await axiosSecure.patch(`/users/${user.email}`, updateInfo);
       if (res.data.modifiedCount > 0) {
-        Swal.fire("Success!", "Profile and Picture updated!", "success");
+        Swal.fire("Success!", "Profile updated successfully!", "success");
         document.getElementById("edit_profile_modal").close();
         refetch();
       }
@@ -63,14 +61,23 @@ const MyProfile = () => {
     <div className="min-h-screen flex justify-center items-center px-4 bg-base-200 py-10">
       <div className="w-full max-w-6xl bg-base-100 rounded-2xl shadow-xl p-6 md:p-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
           {/* প্রোফাইল ইমেজ সেকশন */}
           <div className="flex flex-col items-center">
             <img
               src={profile.role === "hr" ? profile.companyLogo : (profile.photo || "https://i.ibb.co/PNG-placeholder.png")}
               alt="Profile"
               className="w-48 h-48 sm:w-64 sm:h-64 object-cover rounded-full border-4 border-primary shadow-2xl mb-4"
+              onError={(e) => { e.target.src = "https://i.ibb.co/PNG-placeholder.png" }}
             />
-            <span className="badge badge-primary p-3 uppercase font-bold">{profile.role}</span>
+            <div className="flex flex-col items-center gap-2">
+              <span className="badge badge-primary p-3 uppercase font-bold">{profile.role}</span>
+              {profile.role === "hr" && (
+                <span className="badge badge-outline badge-success font-bold uppercase">
+                  Plan: {profile.packageName || "Basic"}
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="card-body p-0">
@@ -82,20 +89,43 @@ const MyProfile = () => {
               <InfoRow label="Date of Birth" value={profile.dateOfBirth || "Not Set"} />
               <InfoRow label="Joined On" value={new Date(profile.createdAt).toLocaleDateString()} />
 
+              {/* ✅ মেম্বার লিমিট এবং স্ট্যাটাস সেকশন (শুধুমাত্র HR-এর জন্য) */}
               {profile.role === "hr" ? (
-                <InfoRow label="Employees" value={profile.currentEmployees} to="/dashboard/my-employees" />
+                <>
+                  <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm mt-4">
+                    <h3 className="text-blue-800 font-bold mb-2">Subscription & Limits</h3>
+                    <div className="space-y-2">
+                      <InfoRow label="Employees Limit" value={`${profile.currentEmployees || 0} / ${profile.packageLimit || 5}`} to="/dashboard/my-employees" />
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                        <div
+                          className="bg-primary h-2.5 rounded-full"
+                          style={{ width: `${Math.min(((profile.currentEmployees || 0) / (profile.packageLimit || 5)) * 100, 100)}%` }}>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 text-right mt-1">
+                        {(profile.packageLimit || 5) - (profile.currentEmployees || 0)} slots remaining
+                      </p>
+                    </div>
+                  </div>
+                </>
               ) : (
                 <InfoRow label="Assigned Assets" value={profile.assets?.length || 0} to="/dashboard/my-assetes" />
               )}
             </div>
 
-            <div className="mt-8">
+            <div className="mt-8 flex flex-wrap gap-4">
               <button
                 onClick={() => document.getElementById("edit_profile_modal").showModal()}
-                className="btn btn-primary w-full sm:w-auto"
+                className="btn btn-primary flex-1 sm:flex-none"
               >
                 Update Profile & Picture
               </button>
+
+              {profile.role === "hr" && (
+                <Link to="/dashboard/upgrade-package-hr" className="btn btn-outline btn-secondary flex-1 sm:flex-none">
+                  Upgrade Plan
+                </Link>
+              )}
             </div>
           </div>
         </div>
