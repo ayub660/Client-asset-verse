@@ -2,7 +2,7 @@ import React from "react";
 import useRole from "../../../hooks/useRole";
 import Loading from "../../../components/Loading/Loading";
 import EmployeeDashboard from "./EmployeeDashboard";
-// import HRDashboard from "./HRDashboard"; // যদি HRDashboard বানানো থাকে তবে এটি আনকমেন্ট করুন
+import HRDashboard from "./HRDashboard"; // আমি এটি ইমপোর্ট করে দিয়েছি
 
 const DashboardHome = () => {
   const { role, roleLoading } = useRole();
@@ -11,24 +11,20 @@ const DashboardHome = () => {
     return <Loading />;
   }
 
-  // রোল অনুযায়ী সঠিক ড্যাশবোর্ড কন্টেন্ট রিটার্ন করা
+  // ১. যদি ইউজার HR হয় তবে সরাসরি চার্ট ও স্ট্যাটাস কার্ডওয়ালা ড্যাশবোর্ড দেখাবে
   if (role === "hr") {
-    // return <HRDashboard />; 
-    return (
-      <div className="p-10 text-center">
-        <h2 className="text-3xl font-bold">Welcome HR Manager</h2>
-        <p>Use the sidebar to manage company assets.</p>
-      </div>
-    );
+    return <HRDashboard />;
   }
 
+  // ২. যদি ইউজার Employee হয়
   if (role === "employee") {
     return <EmployeeDashboard />;
   }
 
+  // ৩. কোনো রোল না পাওয়া গেলে
   return (
-    <div className="p-10 text-center text-error">
-      Role not identified. Please contact support.
+    <div className="p-10 text-center text-error font-semibold">
+      Role not identified. Please login again or contact support.
     </div>
   );
 };
