@@ -42,18 +42,41 @@ const AllRequests = () => {
     try {
       const res = await axiosSecure.post(`/requests/${id}/approve`);
       if (res.data.success) {
-        Swal.fire({ title: "Approved!", icon: "success", timer: 1500, showConfirmButton: false });
+        Swal.fire({
+          title: "Approved!",
+          text: "Asset request has been approved.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
         queryClient.invalidateQueries(["hr-requests"]);
         refetch();
         refetchProfile();
       }
     } catch (err) {
       const msg = err.response?.data?.message || "Approve failed";
-      if (msg.includes("limit")) {
-        Swal.fire({ title: "Limit Reached!", text: msg, icon: "warning", showCancelButton: true, confirmButtonText: "Upgrade" }).then((result) => {
-          if (result.isConfirmed) navigate("/dashboard/upgrade-package-hr");
+
+      // যদি লিমিট শেষ হয়ে যাওয়ার এরর আসে
+      if (msg.toLowerCase().includes("limit")) {
+        Swal.fire({
+          title: "<strong>Limit Reached!</strong>",
+          icon: "warning",
+          html: `Your employee limit is over. Please <b>Upgrade</b> your package to approve more members.`,
+          showCancelButton: true,
+          focusConfirm: false,
+          confirmButtonText: "Upgrade Now",
+          confirmButtonColor: "#3085d6",
+          cancelButtonText: "Cancel",       // cancell button
+          cancelButtonColor: "#d33",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // User ke upgrade packagre e niye jabe
+            navigate("/dashboard/upgrade-package-hr");
+          }
         });
-      } else { Swal.fire("Error!", msg, "error"); }
+      } else {
+        Swal.fire("Error!", msg, "error");
+      }
     }
   };
 
