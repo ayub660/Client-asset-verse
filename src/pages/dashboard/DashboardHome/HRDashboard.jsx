@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import Loading from "../../../components/Loading/Loading";
 import HrChart from "../../../components/hr/HRCharts";
+import TopRequestedAssetsChart from "../Charts/TopRequestedAssetsChart/TopRequestedAssetsChart";
 
 const HRDashboard = () => {
   const axiosSecure = useAxiosSecure();
@@ -41,8 +42,7 @@ const HRDashboard = () => {
       </div>
 
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-8">
 
         <div className="lg:col-span-7 bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300 overflow-hidden">
           <HrChart data={stats?.chartData || []} />
@@ -85,6 +85,16 @@ const HRDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Top rated asset bar chart*/}
+      <div className="grid grid-cols-1 gap-8 mb-10">
+        <div className="bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300">
+          {/* Top rated chart*/}
+          <TopRequestedAssetsChart data={stats?.topChartData || []} />
+        </div>
+      </div>
+
+      {/* Welcome Message*/}
       <div className="mt-10 bg-gradient-to-r from-blue-600 to-indigo-700 p-8 rounded-2xl text-white shadow-lg">
         <h4 className="text-2xl font-bold mb-2">Welcome Back, HR Manager!</h4>
         <p className="opacity-90 max-w-2xl text-blue-50">

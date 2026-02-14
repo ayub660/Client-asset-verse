@@ -1,51 +1,69 @@
-
+import React from "react";
 import {
     BarChart,
     Bar,
     XAxis,
     YAxis,
+    CartesianGrid,
     Tooltip,
     ResponsiveContainer,
-    CartesianGrid,
+    Cell,
 } from "recharts";
-import { useQuery } from "@tanstack/react-query";
-import useAxiosSecure from "../../../../hooks/useAxiosSecure";
-import Loading from "../../../../components/Loading/Loading";
 
-const TopRequestedAssetsChart = () => {
-    const axiosSecure = useAxiosSecure();
+const COLORS = ["#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef"];
 
-    const { data: requestedAssets = [], isLoading } = useQuery({
-        queryKey: ["top-requested-assets"],
-        queryFn: async () => {
-            const res = await axiosSecure.get("/analytics/top-requested-assets");
-            return res.data;
-        },
-    });
-
-    if (isLoading) return <Loading />;
-
-    if (!requestedAssets.length) {
+const TopRequestedAssetsChart = ({ data }) => {
+    if (!data || data.length === 0) {
         return (
-            <div className="bg-base-100 flex justify-center items-center p-6 rounded-xl shadow h-72 w-full">
-                <p className="text-sm text-gray-500">No requested data available</p>
+            <div className="h-64 flex items-center justify-center opacity-50 italic">
+                No request data available yet.
             </div>
         );
     }
 
     return (
-        <div className="bg-base-100 p-6 rounded-xl shadow h-72 w-full">
-            <h3 className="text-sm font-semibold mb-2 text-center">
-                Top 5 Requested Assets
+        <div className="w-full h-80">
+            <h3 className="text-left font-bold mb-6 text-base-content uppercase tracking-wider text-sm border-l-4 border-primary pl-3">
+                Most Requested Assets
             </h3>
-
             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={requestedAssets}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} interval={0} />
-                    <YAxis allowDecimals={false} />
-                    <Tooltip />
-                    <Bar dataKey="requests" />
+
+                <BarChart
+                    data={data}
+                    layout="vertical"
+                    margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
+                >
+                    <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} opacity={0.1} />
+
+
+                    <XAxis type="number" hide />
+
+
+                    <YAxis
+                        dataKey="name"
+                        type="category"
+                        axisLine={false}
+                        tickLine={false}
+                        width={100}
+                        tick={{ fill: "currentColor", fontSize: 11, fontWeight: 500 }}
+                    />
+
+                    <Tooltip
+                        cursor={{ fill: "rgba(0,0,0,0.05)" }}
+                        contentStyle={{
+                            backgroundColor: "var(--fallback-b1, #1d232a)",
+                            border: "none",
+                            borderRadius: "8px",
+                            fontSize: "12px"
+                        }}
+                    />
+
+
+                    <Bar dataKey="count" barSize={20} radius={[0, 10, 10, 0]}>
+                        {data.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                    </Bar>
                 </BarChart>
             </ResponsiveContainer>
         </div>

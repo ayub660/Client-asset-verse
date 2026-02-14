@@ -5,14 +5,14 @@ import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
-    // bg-neutral ব্যাকগ্রাউন্ড এবং সরাসরি
+    // bg-neutral
     <footer className="bg-neutral !text-white pt-16">
       <div className="footer max-w-7xl mx-auto px-10 pb-12 grid grid-cols-1 md:grid-cols-3 gap-12">
 
-        {/* ১. ব্র্যান্ডিং ও পরিচিতি  */}
+
         <aside className="flex flex-col gap-4">
           <Logo />
-          {/* text-white !important স্টাইল দিয়ে কনফার্ম করা হলো */}
+          {/* text-white !important */}
           <p className="font-black text-2xl !text-white tracking-tight mt-2">Asset Verse</p>
           <p className="max-w-xs text-[15px] leading-relaxed !text-white opacity-100">
             Professional B2B HR & Asset Management solution.
@@ -39,7 +39,7 @@ const Footer = () => {
           </div>
         </nav>
 
-        {/* ৩. কন্টাক্ট ইনফো - সব টেক্সট Pure White */}
+        {/* ৩. কন্টাক্ট ইনফো - Pure White */}
         <nav>
           <h6 className="footer-title opacity-100 font-bold !text-white text-sm mb-6 uppercase tracking-widest border-b border-primary pb-1 inline-block">
             Contact Us

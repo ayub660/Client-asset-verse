@@ -1,18 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import Loading from "../../../components/Loading/Loading";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-
 import RequestAssetGrid from "../../../components/employee/RequestAssetGrid";
 
 const AssetList = () => {
   const modalRef = useRef(null);
   const axiosSecure = useAxiosSecure();
   const [selectedAsset, setSelectedAsset] = useState(null);
+
+  // Search & Filter States
   const [searchText, setSearchText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState(""); // Returnable/Non-returnable filter
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -20,21 +22,45 @@ const AssetList = () => {
 
   const { register, handleSubmit, setValue, reset } = useForm();
 
+
   const { data: assets = [], isLoading, refetch } = useQuery({
     queryKey: ["assets", searchQuery],
     queryFn: async () => {
-      const res = await axiosSecure.get("/assets");
+
+      const res = await axiosSecure.get(`/assets?search=${searchQuery}`);
       return res.data;
     },
     staleTime: 1000 * 5,
     refetchOnWindowFocus: false,
   });
 
-  // Pagination Logic
+
+  const filteredAssets = assets.filter((asset) => {
+    const matchesSearch = asset.productName
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesType = filterType ? asset.productType === filterType : true;
+    return matchesSearch && matchesType;
+  });
+
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentAssets = assets.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(assets.length / itemsPerPage);
+  const currentAssets = filteredAssets.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredAssets.length / itemsPerPage);
+
+  const handleSearch = () => {
+    setSearchQuery(searchText.trim());
+    setCurrentPage(1);
+  };
+
+  const handleReset = () => {
+    setSearchText("");
+    setSearchQuery("");
+    setFilterType("");
+    setCurrentPage(1);
+  };
+
 
   const openEditModal = (asset) => {
     setSelectedAsset(asset);
@@ -48,7 +74,7 @@ const AssetList = () => {
     if (!selectedAsset) return;
     try {
       const res = await axiosSecure.patch(`/assets/${selectedAsset._id}`, data);
-      if (res.data.modifiedCount) {
+      if (res.data.modifiedCount > 0) {
         modalRef.current.close();
         reset();
         refetch();
@@ -65,13 +91,13 @@ const AssetList = () => {
       text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
     });
 
     if (result.isConfirmed) {
       try {
         const res = await axiosSecure.delete(`/assets/${id}`);
-        if (res.data.deletedCount) {
+        if (res.data.deletedCount > 0) {
           refetch();
           Swal.fire("Deleted!", "Asset has been removed.", "success");
         }
@@ -81,21 +107,16 @@ const AssetList = () => {
     }
   };
 
-  const handleSearch = () => {
-    setSearchQuery(searchText.trim());
-    setCurrentPage(1);
-  };
-
   if (isLoading) return <Loading />;
 
   return (
-    <div className="bg-base-100 rounded-xl p-5">
-      <h2 className="text-3xl font-bold mb-6 text-center text-primary">
-        All Assets ({assets.length})
+    <div className="bg-base-100 rounded-xl p-5 shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center text-primary uppercase tracking-wide">
+        Asset Inventory ({filteredAssets.length})
       </h2>
 
-      {/* Search Bar */}
-      <div className="flex justify-center mb-8">
+
+      <div className="flex flex-col md:flex-row gap-4 justify-center mb-8 items-center">
         <div className="join w-full max-w-md">
           <input
             className="input input-bordered join-item w-full"
@@ -104,13 +125,35 @@ const AssetList = () => {
             onChange={(e) => setSearchText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
-          <button onClick={handleSearch} className="btn btn-primary join-item">Search</button>
+          <button onClick={handleSearch} className="btn btn-primary join-item">
+            Search
+          </button>
         </div>
+
+
+        <select
+          className="select select-bordered w-full max-w-xs"
+          value={filterType}
+          onChange={(e) => {
+            setFilterType(e.target.value);
+            setCurrentPage(1);
+          }}
+        >
+          <option value="">All Types</option>
+          <option value="Returnable">Returnable</option>
+          <option value="Non-returnable">Non-returnable</option>
+        </select>
+
+        <button onClick={handleReset} className="btn btn-ghost text-error underline">
+          Reset
+        </button>
       </div>
 
-      {/* Grid Display */}
-      {assets.length === 0 ? (
-        <div className="text-center py-10 text-gray-500">No assets found.</div>
+
+      {filteredAssets.length === 0 ? (
+        <div className="text-center py-20">
+          <p className="text-xl text-gray-400 font-semibold italic">No assets match your search.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {currentAssets.map((asset) => (
@@ -124,15 +167,16 @@ const AssetList = () => {
         </div>
       )}
 
-      {/* Pagination */}
+
       {totalPages > 1 && (
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center mt-12 mb-5">
           <div className="join">
             {[...Array(totalPages).keys()].map((num) => (
               <button
                 key={num}
                 onClick={() => setCurrentPage(num + 1)}
-                className={`join-item btn ${currentPage === num + 1 ? "btn-primary" : "btn-outline"}`}
+                className={`join-item btn btn-md ${currentPage === num + 1 ? "btn-primary" : "btn-outline"
+                  }`}
               >
                 {num + 1}
               </button>
@@ -141,19 +185,31 @@ const AssetList = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
-      <dialog ref={modalRef} className="modal">
+
+      <dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
         <div className="modal-box">
-          <h3 className="font-bold text-lg mb-4">Edit Asset</h3>
+          <h3 className="font-bold text-lg mb-6 text-primary">Edit Asset Information</h3>
           <form onSubmit={handleSubmit(onSubmitEdit)} className="space-y-4">
-            <input {...register("productName")} className="input input-bordered w-full" placeholder="Product Name" />
-            <select {...register("productType")} className="select select-bordered w-full">
-              <option value="Returnable">Returnable</option>
-              <option value="Non-returnable">Non-returnable</option>
-            </select>
-            <input type="number" {...register("productQuantity")} className="input input-bordered w-full" placeholder="Quantity" />
+            <div className="form-control">
+              <label className="label font-semibold">Product Name</label>
+              <input {...register("productName")} className="input input-bordered w-full" />
+            </div>
+
+            <div className="form-control">
+              <label className="label font-semibold">Product Type</label>
+              <select {...register("productType")} className="select select-bordered w-full">
+                <option value="Returnable">Returnable</option>
+                <option value="Non-returnable">Non-returnable</option>
+              </select>
+            </div>
+
+            <div className="form-control">
+              <label className="label font-semibold">Quantity</label>
+              <input type="number" {...register("productQuantity")} className="input input-bordered w-full" />
+            </div>
+
             <div className="modal-action">
-              <button type="submit" className="btn btn-primary">Update</button>
+              <button type="submit" className="btn btn-primary px-8">Save Changes</button>
               <button type="button" onClick={() => modalRef.current.close()} className="btn">Cancel</button>
             </div>
           </form>
