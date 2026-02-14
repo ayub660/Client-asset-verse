@@ -20,6 +20,8 @@ const Login = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
+
+  // ✅ JWT Handling Logic (Unchanged)
   const handleAuthSuccess = async (user) => {
     try {
       const res = await axios.post("/jwt", {
@@ -31,9 +33,7 @@ const Login = () => {
       if (res.data.token) {
         localStorage.setItem("access-token", res.data.token);
 
-
         setTimeout(() => {
-
           const destination = location?.state || "/dashboard";
           navigate(destination, { replace: true });
         }, 500);
@@ -44,7 +44,7 @@ const Login = () => {
     }
   };
 
-  // ✅ Email / Password Login
+  // ✅ Email / Password Login Logic (Unchanged)
   const handleLogin = async (data) => {
     try {
       const result = await loginWithEmail(data.email, data.password);
@@ -56,7 +56,7 @@ const Login = () => {
     }
   };
 
-  // ✅ Google Login (FIXED)
+  // ✅ Google Login Logic (Unchanged)
   const handleGoogleLogin = async () => {
     try {
       const result = await loginWithGoogle();
@@ -64,7 +64,6 @@ const Login = () => {
 
       toast.success("Login Successful with Google!");
       await handleAuthSuccess(user);
-
     } catch (err) {
       console.error("Google Login Error:", err);
       toast.error(err.message);
@@ -72,17 +71,17 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-white dark:bg-gray-950 px-4 py-10">
+    <div className="min-h-screen flex justify-center items-center bg-base-200 dark:bg-gray-950 px-4 py-10 transition-colors duration-300">
       <Helmet>
         <title>Login | AssetVerse</title>
       </Helmet>
 
-      <div className="w-full max-w-md bg-white dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-2xl shadow-indigo-100/50 dark:shadow-none p-8 md:p-10">
+      <div className="w-full max-w-md bg-base-100 dark:bg-gray-900 rounded-[2.5rem] border border-gray-100 dark:border-gray-800 shadow-2xl shadow-indigo-100/50 dark:shadow-none p-8 md:p-10">
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-black text-gray-900 dark:text-white">
+          <h2 className="text-3xl md:text-4xl font-black text-base-content dark:text-white">
             Welcome <span className="text-[#6366f1]">Back</span>
           </h2>
-          <p className="text-gray-500 font-medium mt-2">
+          <p className="text-gray-500 dark:text-gray-400 font-medium mt-2">
             Login to manage your assets
           </p>
         </div>
@@ -91,7 +90,7 @@ const Login = () => {
         <button
           onClick={handleGoogleLogin}
           type="button"
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl text-gray-700 dark:text-gray-200 font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 mb-6 group"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl text-base-content dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 mb-6 group"
         >
           <FcGoogle className="text-2xl group-hover:scale-110 transition-transform" />
           <span>Continue with Google</span>
@@ -102,16 +101,16 @@ const Login = () => {
             <span className="w-full border-t border-gray-100 dark:border-gray-700"></span>
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white dark:bg-gray-900 px-4 text-gray-400 font-bold tracking-widest">
+            <span className="bg-base-100 dark:bg-gray-900 px-4 text-gray-400 font-bold tracking-widest">
               Or Email Login
             </span>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(handleLogin)} className="space-y-5">
-          {/* Email */}
+          {/* Email Address */}
           <div className="space-y-2">
-            <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">
+            <label className="text-sm font-bold text-base-content/80 dark:text-gray-300 ml-1">
               Email Address
             </label>
             <div className="relative">
@@ -120,7 +119,10 @@ const Login = () => {
                 {...register("email", { required: "Email is Required" })}
                 type="email"
                 placeholder="Enter your email"
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none"
+                /* Fix: text-black নিশ্চিত করে লাইট মোডে কালো লেখা, 
+                   dark:text-white নিশ্চিত করে ডার্ক মোডে সাদা লেখা 
+                */
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none text-black dark:text-white placeholder-gray-400"
               />
             </div>
             {errors.email && (
@@ -133,7 +135,7 @@ const Login = () => {
           {/* Password */}
           <div className="space-y-2">
             <div className="flex justify-between items-center ml-1">
-              <label className="text-sm font-bold text-gray-700 dark:text-gray-300">
+              <label className="text-sm font-bold text-base-content/80 dark:text-gray-300">
                 Password
               </label>
               <Link
@@ -150,7 +152,10 @@ const Login = () => {
                 {...register("password", { required: "Password is Required" })}
                 type={passType ? "text" : "password"}
                 placeholder="••••••••"
-                className="w-full pl-12 pr-12 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none"
+                /* Fix: text-black নিশ্চিত করে লাইট মোডে কালো লেখা, 
+                   dark:text-white নিশ্চিত করে ডার্ক মোডে সাদা লেখা 
+                */
+                className="w-full pl-12 pr-12 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none text-black dark:text-white placeholder-gray-400"
               />
               <button
                 type="button"
@@ -175,7 +180,7 @@ const Login = () => {
             Sign In
           </button>
 
-          <p className="text-center text-sm text-gray-500 font-medium pt-4">
+          <p className="text-center text-sm text-gray-500 dark:text-gray-400 font-medium pt-4">
             New here?{" "}
             <Link
               to="/register-employee"

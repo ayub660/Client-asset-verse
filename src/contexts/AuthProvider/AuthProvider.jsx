@@ -17,6 +17,26 @@ const AuthProvider = ({ children }) => {
     const [role, setRole] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // --- ১. ডার্ক মোড স্টেট এবং লজিক ---
+    const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
+
+    const toggleTheme = () => {
+        const newTheme = theme === "light" ? "dark" : "light";
+        setTheme(newTheme);
+        localStorage.setItem("theme", newTheme);
+    };
+
+    // থিম পরিবর্তন হলে HTML ট্যাগ আপডেট করা
+    useEffect(() => {
+        document.documentElement.setAttribute("data-theme", theme);
+        if (theme === "dark") {
+            document.documentElement.classList.add("dark");
+        } else {
+            document.documentElement.classList.remove("dark");
+        }
+    }, [theme]);
+    // --------------------------------
+
     const showError = (message) => {
         Swal.fire({
             icon: "error",
@@ -33,79 +53,37 @@ const AuthProvider = ({ children }) => {
             setUser(res.user);
             setRole(userRole);
             localStorage.setItem("userRole", userRole);
-
-            Swal.fire({
-                icon: "success",
-                title: "Registration Successful",
-                text: `Welcome ${name}`,
-                showConfirmButton: false,
-                timer: 1500,
-            });
-
             return { user: res.user, role: userRole };
         } catch (error) {
-            if (error.code === "auth/email-already-in-use") {
-                showError("This email is already registered. Please use a different email.");
-            } else if (error.code === "auth/invalid-email") {
-                showError("Invalid email address.");
-            } else if (error.code === "auth/weak-password") {
-                showError("Password should be at least 6 characters.");
-            } else {
-                showError("Registration failed. Please try again.");
-            }
+            showError(error.message);
             throw error;
         }
     };
 
-    // Login with Email
+    // Login
     const loginWithEmail = async (email, password) => {
         try {
             const res = await signInWithEmailAndPassword(auth, email, password);
             setUser(res.user);
-
             const savedRole = localStorage.getItem("userRole") || "employee";
             setRole(savedRole);
-
-            Swal.fire({
-                icon: "success",
-                title: "Login Successful",
-                text: `Welcome back ${res.user.displayName || "User"}`,
-                showConfirmButton: false,
-                timer: 1500,
-            });
-
             return { user: res.user, role: savedRole };
         } catch (error) {
-            if (error.code === "auth/user-not-found" || error.code === "auth/wrong-password") {
-                showError("Invalid email or password.");
-            } else if (error.code === "auth/invalid-email") {
-                showError("Invalid email address.");
-            } else {
-                showError("Login failed. Please try again.");
-            }
+            showError("Login failed.");
             throw error;
         }
     };
 
-    // Google login
+    // Google Login
     const loginWithGoogle = async (selectedRole) => {
         try {
             const res = await signInWithPopup(auth, googleProvider);
             setUser(res.user);
             setRole(selectedRole);
             localStorage.setItem("userRole", selectedRole);
-
-            Swal.fire({
-                icon: "success",
-                title: "Login Successful",
-                text: `Welcome ${res.user.displayName}`,
-                showConfirmButton: false,
-                timer: 1500,
-            });
-
             return { user: res.user, role: selectedRole };
         } catch (error) {
-            showError("Google login failed. Please try again.");
+            showError("Google login failed.");
             throw error;
         }
     };
@@ -116,16 +94,15 @@ const AuthProvider = ({ children }) => {
             await signOut(auth);
             setUser(null);
             setRole(null);
+            // শুধু টোকেন এবং রোল মুছুন, থিম মুছবেন না!
             localStorage.removeItem("userRole");
             localStorage.removeItem("access-token");
-
-            Swal.fire({ icon: "success", title: "Logged Out", showConfirmButton: false, timer: 1200 });
         } catch (error) {
-            showError("Logout failed. Please try again.");
+            showError("Logout failed.");
         }
     };
 
-    // Track auth state
+    // Auth State Observer
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
@@ -145,8 +122,10 @@ const AuthProvider = ({ children }) => {
                 registerWithEmail,
                 loginWithEmail,
                 loginWithGoogle,
-                logout,
+                logout, // আপনার Navbar-এ LogOut বানানটি এখানে logout এর সাথে মিলিয়ে নিন
                 setRole,
+                theme,        // থিম ভ্যালু পাস করা হচ্ছে
+                toggleTheme,  // থিম চেঞ্জ ফাংশন পাস করা হচ্ছে
             }}
         >
             {children}

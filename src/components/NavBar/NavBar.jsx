@@ -12,6 +12,16 @@ const Navbar = () => {
   const { user, LogOut, theme, toggleTheme } = useAuth();
   const axiosSecure = useAxiosSecure();
 
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    document.documentElement.setAttribute("data-theme", savedTheme);
+    if (savedTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
   const { data: profile = {} } = useQuery({
     queryKey: ["my-profile", user?.email],
     enabled: !!user?.email && !!localStorage.getItem("access-token"),
