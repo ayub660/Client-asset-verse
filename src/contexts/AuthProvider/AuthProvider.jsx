@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+
 import { auth, googleProvider } from "../../services/firebase.config";
 import {
     createUserWithEmailAndPassword,
@@ -94,7 +95,7 @@ const AuthProvider = ({ children }) => {
             await signOut(auth);
             setUser(null);
             setRole(null);
-            // শুধু টোকেন এবং রোল মুছুন, থিম মুছবেন না!
+
             localStorage.removeItem("userRole");
             localStorage.removeItem("access-token");
         } catch (error) {
@@ -122,10 +123,10 @@ const AuthProvider = ({ children }) => {
                 registerWithEmail,
                 loginWithEmail,
                 loginWithGoogle,
-                logout, // আপনার Navbar-এ LogOut বানানটি এখানে logout এর সাথে মিলিয়ে নিন
+                logout,
                 setRole,
-                theme,        // থিম ভ্যালু পাস করা হচ্ছে
-                toggleTheme,  // থিম চেঞ্জ ফাংশন পাস করা হচ্ছে
+                theme,
+                toggleTheme,
             }}
         >
             {children}

@@ -2,8 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import HeroImg from "../../assets/images/hero.png";
+import { useState } from "react";
 
 const Hero = () => {
+    const [isLoaded, setIsLoaded] = useState(false);
     return (
         <div className="relative min-h-[90vh] flex items-center bg-white dark:bg-gray-950 transition-colors duration-300 overflow-hidden">
             {/* Background Decorative Blur */}

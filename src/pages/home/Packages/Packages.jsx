@@ -4,9 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import Loading from "../../../components/Loading/Loading";
 import { motion } from "framer-motion";
 import { FaCheckCircle } from "react-icons/fa";
+import { useNavigate, useLocation } from "react-router-dom";
+import useAuth from "../../../hooks/useAuth";
 
 const Packages = () => {
   const axios = useAxios();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { data: packages = [], isLoading } = useQuery({
     queryKey: ["packages"],
@@ -16,26 +21,29 @@ const Packages = () => {
     },
   });
 
+
+  const handlePurchase = (planId) => {
+    if (!user) {
+
+      navigate("/login", { state: { from: location } });
+    } else {
+
+      navigate(`/payment/${planId}`);
+    }
+  };
+
   if (isLoading) return <Loading />;
 
   return (
     <section className="py-24 bg-gray-50 overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-16 space-y-4"
-        >
+
+        <motion.div className="text-center mb-16 space-y-4">
           <h2 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight">
             Flexible <span className="text-[#6366f1]">Pricing</span> for Every Business
           </h2>
           <div className="w-24 h-1.5 bg-[#6366f1] mx-auto rounded-full"></div>
-          <p className="mt-4 text-gray-600 text-lg max-w-2xl mx-auto font-medium">
-            Choose the perfect plan to manage your assets efficiently and scale your team without limits.
-          </p>
         </motion.div>
 
         {/* Pricing Grid */}
@@ -43,11 +51,8 @@ const Packages = () => {
           {packages.slice(0, 3).map((plan, index) => (
             <motion.div
               key={plan._id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: index * 0.1 }}
-              className={`relative flex flex-col p-8 bg-white rounded-[2.5rem] shadow-xl transition-all duration-300 hover:shadow-2xl border-2 ${index === 1 ? "border-[#6366f1] md:scale-110 z-10" : "border-transparent"
+
+              className={`relative flex flex-col p-8 bg-white rounded-[2.5rem] shadow-xl transition-all duration-300 border-2 ${index === 1 ? "border-[#6366f1] md:scale-110 z-10" : "border-transparent"
                 }`}
             >
               {/* Most Popular Tag */}
@@ -75,18 +80,19 @@ const Packages = () => {
               {/* Features List */}
               <ul className="flex-1 space-y-4 mb-10">
                 {(plan.features || ["Admin Dashboard", "Asset Tracking", "Real-time Reports"]).map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-3 text-gray-600 font-medium text-[15px]">
-                    <FaCheckCircle className="text-[#6366f1] flex-shrink-0 text-lg" />
+                  <li key={idx} className="flex items-center gap-3 text-gray-600 font-medium">
+                    <FaCheckCircle className="text-[#6366f1] flex-shrink-0" />
                     {feature}
                   </li>
                 ))}
               </ul>
 
-              {/* CTA Button */}
+
               <button
+                onClick={() => handlePurchase(plan._id)}
                 className={`btn h-14 rounded-2xl text-lg font-black transition-all border-none ${index === 1
-                    ? "bg-[#6366f1] text-white shadow-lg shadow-indigo-200 hover:bg-[#4f46e5]"
-                    : "bg-gray-100 text-gray-800 hover:bg-gray-200"
+                  ? "bg-[#6366f1] text-white shadow-lg hover:bg-[#4f46e5]"
+                  : "bg-gray-100 text-gray-800 hover:bg-gray-200"
                   }`}
               >
                 Purchase Now

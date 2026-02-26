@@ -4,12 +4,14 @@ import { FaBuilding, FaBoxOpen, FaUserCheck } from "react-icons/fa";
 import { useQuery } from "@tanstack/react-query";
 import useAxiosPublic from "../../../hooks/useAxiosPublic";
 import CountUp from "react-countup";
+import Loader from "../../../components/common/Loader";
 
 const Stats = () => {
   const axiosPublic = useAxiosPublic();
 
-  // ব্যাকএন্ড থেকে ডাটা ফেচ করা
+  //backend data fetch
   const { data: publicStats = {}, isLoading } = useQuery({
+
     queryKey: ['public-stats'],
     queryFn: async () => {
       const res = await axiosPublic.get('/public-stats');
@@ -41,7 +43,7 @@ const Stats = () => {
     },
   ];
 
-  if (isLoading) return <div className="flex justify-center py-20"><span className="loading loading-dots loading-lg text-indigo-600"></span></div>;
+  if (isLoading) return <Loader></Loader>;
 
   return (
     <section className="py-10 bg-transparent relative z-30">
