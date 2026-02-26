@@ -1,5 +1,5 @@
 import React from "react";
-import feature2 from "../../../assets/feature2.png"; // Apnar assets path onujayi check korun
+import feature2 from "../../../assets/feature2.png";
 import { FaCheckCircle } from "react-icons/fa";
 
 const About = () => {

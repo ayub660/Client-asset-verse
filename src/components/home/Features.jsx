@@ -11,7 +11,6 @@ const featuresData = [
     { id: 3, title: "Analytics", desc: "Visualize usage trends and asset stats.", img: Feature3 },
     { id: 4, title: "Team Management", desc: "Manage employees and their assigned assets.", img: Feature4 },
 ];
-
 const Features = () => {
     return (
         <section className="py-20 bg-indigo-50">

@@ -1,82 +1,110 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { FaBuilding, FaBoxOpen, FaUserCheck } from "react-icons/fa";
-
-const stats = [
-  {
-    icon: <FaBuilding />,
-    value: "100+",
-    label: "Active Organizations",
-    description: "Empowering businesses globally with smart asset solutions.",
-    color: "from-blue-500 to-indigo-600"
-  },
-  {
-    icon: <FaBoxOpen />,
-    value: "5,000+",
-    label: "Assets Managed",
-    description: "Successfully tracking inventory across multiple departments.",
-    color: "from-indigo-500 to-purple-600"
-  },
-  {
-    icon: <FaUserCheck />,
-    value: "99%",
-    label: "Accuracy Rate",
-    description: "Minimizing loss and ensuring precision in every assignment.",
-    color: "from-emerald-500 to-teal-600"
-  },
-];
+import { useQuery } from "@tanstack/react-query";
+import useAxiosPublic from "../../../hooks/useAxiosPublic";
+import CountUp from "react-countup";
 
 const Stats = () => {
+  const axiosPublic = useAxiosPublic();
+
+  // ব্যাকএন্ড থেকে ডাটা ফেচ করা
+  const { data: publicStats = {}, isLoading } = useQuery({
+    queryKey: ['public-stats'],
+    queryFn: async () => {
+      const res = await axiosPublic.get('/public-stats');
+      return res.data;
+    }
+  });
+
+  const statsData = [
+    {
+      icon: <FaBuilding />,
+      value: publicStats.totalCompanies || 0,
+      label: "Organizations",
+      suffix: "+",
+      color: "from-blue-500 to-indigo-600",
+    },
+    {
+      icon: <FaBoxOpen />,
+      value: publicStats.totalAssets || 0,
+      label: "Assets Tracked",
+      suffix: "",
+      color: "from-indigo-500 to-purple-600",
+    },
+    {
+      icon: <FaUserCheck />,
+      value: publicStats.totalUsers || 0,
+      label: "Active Users",
+      suffix: "+",
+      color: "from-emerald-500 to-teal-600",
+    },
+  ];
+
+  if (isLoading) return <div className="flex justify-center py-20"><span className="loading loading-dots loading-lg text-indigo-600"></span></div>;
+
   return (
-    <section className="py-24 bg-gray-50 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
+    <section className="py-10 bg-transparent relative z-30">
+      <div className="max-w-7xl mx-auto px-6">
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
-
-          {/* Left Side: Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
+        {/* --- SHORT & CLEAN HEADER --- */}
+        <div className="text-center mb-8">
+          <motion.h2
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="flex-1 text-center lg:text-left space-y-6"
+            className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight">
-              Trusted by <span className="text-[#6366f1]">Growing</span> Organizations
-            </h2>
-            <p className="text-gray-600 text-lg font-medium max-w-xl mx-auto lg:mx-0">
-              AssetVerse helps organizations manage assets efficiently with accuracy,
-              transparency, and the confidence to scale.
-            </p>
-            <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4 text-sm font-bold text-gray-400">
-              <span className="px-4 py-2 border border-gray-200 rounded-xl">✓ ISO Certified</span>
-              <span className="px-4 py-2 border border-gray-200 rounded-xl">✓ SOC2 Ready</span>
-            </div>
-          </motion.div>
+            AssetVerse <span className="text-[#6366f1]">in Numbers</span>
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="text-gray-500 dark:text-gray-400 mt-2 text-sm font-medium"
+          >
+            Real-time statistics of our growing community.
+          </motion.p>
+        </div>
 
-          {/* Right Side: Stats Cards */}
-          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-            {stats.map((stat, index) => (
+        {/* --- STATS CARDS CONTAINER --- */}
+        <div className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-xl rounded-[2.5rem] p-8 lg:p-12 border border-white/20 dark:border-gray-800 shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {statsData.map((stat, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                whileHover={{ scale: 1.05 }}
-                className={`p-8 bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 border border-gray-100 flex flex-col items-center text-center ${index === 2 ? 'sm:col-span-2 sm:max-w-xs sm:mx-auto' : ''}`}
+                className="relative group"
               >
-                <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-[#6366f1] flex items-center justify-center text-3xl mb-6 shadow-inner">
-                  {stat.icon}
+                <div className="flex items-center gap-6 p-4 rounded-3xl transition-all duration-500">
+
+                  {/* Icon with Gradient */}
+                  <div className={`w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br ${stat.color} text-white flex items-center justify-center text-2xl md:text-3xl shadow-lg transform group-hover:rotate-6 transition-transform duration-300`}>
+                    {stat.icon}
+                  </div>
+
+                  {/* Text Content */}
+                  <div className="flex flex-col text-left">
+                    <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
+                      <CountUp end={stat.value} duration={2.5} separator="," />{stat.suffix}
+                    </h3>
+                    <p className="text-gray-500 dark:text-gray-400 font-bold text-[11px] md:text-xs uppercase tracking-widest mt-1">
+                      {stat.label}
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-4xl font-black text-gray-900 mb-2">{stat.value}</h3>
-                <p className="text-[#6366f1] font-bold text-sm uppercase tracking-widest mb-3">{stat.label}</p>
-                <p className="text-gray-400 text-xs font-medium leading-relaxed">{stat.description}</p>
+
+                {/* Vertical Divider for Desktop */}
+                {index !== 2 && (
+                  <div className="hidden md:block absolute right-[-15px] top-1/2 -translate-y-1/2 h-10 w-[1px] bg-gray-200 dark:bg-gray-800"></div>
+                )}
               </motion.div>
             ))}
           </div>
-
         </div>
       </div>
     </section>
