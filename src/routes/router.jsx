@@ -22,6 +22,7 @@ import PaymentSucess from "../pages/dashboard/PaymentSucess/PaymentSucess";
 import PaymentCancelled from "../pages/dashboard/PaymentCancelled/PaymentCancelled";
 import MyAssets from "../pages/dashboard/MyAssets/MyAssets";
 import MyTeam from "../pages/dashboard/MyTeam/MyTeam";
+import Contact from "../Contact/Contact";
 
 export const router = createBrowserRouter([
   {
@@ -53,6 +54,11 @@ export const router = createBrowserRouter([
         path: "payment-cancelled",
         element: <PaymentCancelled />,
       },
+      {
+        path: "contact",
+        element: <Contact />,
+      },
+
     ],
   },
   {
@@ -109,6 +115,7 @@ export const router = createBrowserRouter([
         path: "payment-success",
         element: <PaymentSucess />,
       },
+
     ],
   },
 ]);

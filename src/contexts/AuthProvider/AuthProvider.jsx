@@ -18,7 +18,7 @@ const AuthProvider = ({ children }) => {
     const [role, setRole] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // --- ১. ডার্ক মোড স্টেট এবং লজিক ---
+
     const [theme, setTheme] = useState(localStorage.getItem("theme") || "light");
 
     const toggleTheme = () => {
@@ -27,7 +27,7 @@ const AuthProvider = ({ children }) => {
         localStorage.setItem("theme", newTheme);
     };
 
-    // থিম পরিবর্তন হলে HTML ট্যাগ আপডেট করা
+
     useEffect(() => {
         document.documentElement.setAttribute("data-theme", theme);
         if (theme === "dark") {

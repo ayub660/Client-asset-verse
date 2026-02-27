@@ -16,7 +16,7 @@ const RootLayout = () => {
             <Navbar />
 
             {/* Main content - Home, Assets, Profile সব এখানে লোড হবে */}
-            <main className="flex-1 w-full max-w-[1920px] mx-auto overflow-x-hidden">
+            <main className="w-full max-w-[1920px] mx-auto overflow-x-hidden">
                 <Outlet />
             </main>
 

@@ -1,8 +1,9 @@
-import Navbar from "../common/Navbar";
+import Navbar from "../NavBar/NavBar";
 import Footer from "../common/Footer";
 import { Outlet, useNavigation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import Loader from "../common/Loader";
+
 
 const MainLayout = () => {
     const { loading } = useAuth();
@@ -21,8 +22,11 @@ const MainLayout = () => {
     }
 
     return (
+
         <div className="flex flex-col min-h-screen bg-base-100 text-base-content transition-colors duration-300">
+
             <Navbar />
+
 
             <main className="flex-1 relative">
 

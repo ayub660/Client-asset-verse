@@ -3,9 +3,9 @@ import { Helmet } from "react-helmet";
 import { Link } from "react-router-dom";
 
 // Image import
-import feature1 from "../../../assets/images/feature1.png";
-import feature2 from "../../../assets/images/feature2.png";
-import feature3 from "../../../assets/images/feature3.png";
+import feature4 from "../../../assets/images/feature4.png";
+import feature5 from "../../../assets/images/feature5.png";
+import feature6 from "../../../assets/images/feature6.png"
 
 //Component import
 import About from "../About/About";
@@ -22,9 +22,10 @@ const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(1);
 
   const sliderData = [
-    { id: 1, img: feature1 },
-    { id: 2, img: feature2 },
-    { id: 3, img: feature3 },
+    { id: 4, img: feature4 },
+    { id: 5, img: feature5 },
+    { id: 6, img: feature6 },
+
   ];
 
 

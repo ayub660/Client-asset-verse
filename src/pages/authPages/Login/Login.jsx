@@ -119,9 +119,7 @@ const Login = () => {
                 {...register("email", { required: "Email is Required" })}
                 type="email"
                 placeholder="Enter your email"
-                /* Fix: text-black নিশ্চিত করে লাইট মোডে কালো লেখা, 
-                   dark:text-white নিশ্চিত করে ডার্ক মোডে সাদা লেখা 
-                */
+
                 className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none text-black dark:text-white placeholder-gray-400"
               />
             </div>
@@ -152,9 +150,7 @@ const Login = () => {
                 {...register("password", { required: "Password is Required" })}
                 type={passType ? "text" : "password"}
                 placeholder="••••••••"
-                /* Fix: text-black নিশ্চিত করে লাইট মোডে কালো লেখা, 
-                   dark:text-white নিশ্চিত করে ডার্ক মোডে সাদা লেখা 
-                */
+
                 className="w-full pl-12 pr-12 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none text-black dark:text-white placeholder-gray-400"
               />
               <button
