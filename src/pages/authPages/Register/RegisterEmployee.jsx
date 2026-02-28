@@ -15,7 +15,7 @@ const RegisterEmployee = () => {
   const location = useLocation();
   const { registerWithEmail } = useAuth();
   const [passType, setPassType] = useState(false);
-  const [loading, setLoading] = useState(false); // ✅ Loading state for button
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -45,7 +45,7 @@ const RegisterEmployee = () => {
   };
 
   const handleRegistration = async (data) => {
-    // ✅ অতিরিক্ত ৮ ক্যারেক্টার চেক (Swal এর জন্য)
+    // ✅  8 character check)
     if (data.password.length < 8) {
       showAlert("Weak Password!", "Password must be at least 8 characters long.", "warning");
       return;
