@@ -164,7 +164,7 @@ const Login = () => {
             onClick={() => handleDemoLogin("employee")}
             className="flex items-center justify-center gap-2 py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl font-bold hover:bg-emerald-600 hover:text-white transition-all text-sm shadow-sm"
           >
-            <FaUserTie /> Staff Demo
+            <FaUserTie /> Employee Demo
           </button>
         </div>
 
