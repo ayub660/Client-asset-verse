@@ -24,6 +24,7 @@ import MyAssets from "../pages/dashboard/MyAssets/MyAssets";
 import MyTeam from "../pages/dashboard/MyTeam/MyTeam";
 import Contact from "../Contact/Contact";
 import About from "../pages/home/About/About";
+import AssetDetails from "../pages/AssetDetails/AssetDetails";
 
 export const router = createBrowserRouter([
   {
@@ -119,6 +120,10 @@ export const router = createBrowserRouter([
       {
         path: "payment-success",
         element: <PaymentSucess />,
+      },
+      {
+        path: "asset-details/:id",
+        element: <AssetDetails></AssetDetails>,
       },
 
     ],
