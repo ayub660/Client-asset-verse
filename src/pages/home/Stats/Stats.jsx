@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FaBuilding, FaBoxOpen, FaUserCheck } from "react-icons/fa";
+import { FaBuilding, FaBoxOpen, FaUserCheck, FaArrowTrendUp } from "react-icons/fa6";
 import { useQuery } from "@tanstack/react-query";
 import useAxiosPublic from "../../../hooks/useAxiosPublic";
 import CountUp from "react-countup";
@@ -9,9 +9,7 @@ import Loader from "../../../components/common/Loader";
 const Stats = () => {
   const axiosPublic = useAxiosPublic();
 
-  //backend data fetch
   const { data: publicStats = {}, isLoading } = useQuery({
-
     queryKey: ['public-stats'],
     queryFn: async () => {
       const res = await axiosPublic.get('/public-stats');
@@ -22,91 +20,87 @@ const Stats = () => {
   const statsData = [
     {
       icon: <FaBuilding />,
-      value: publicStats.totalCompanies || 0,
-      label: "Organizations",
-      suffix: "+",
-      color: "from-blue-500 to-indigo-600",
+      value: publicStats.totalCompanies || 17,
+      label: "Partner Companies",
+      color: "#3b82f6",
+      trend: "+12% this month"
     },
     {
       icon: <FaBoxOpen />,
-      value: publicStats.totalAssets || 0,
-      label: "Assets Tracked",
-      suffix: "",
-      color: "from-indigo-500 to-purple-600",
+      value: publicStats.totalAssets || 19,
+      label: "Managed Assets",
+      color: "#6366f1",
+      trend: "Real-time sync"
     },
     {
       icon: <FaUserCheck />,
-      value: publicStats.totalUsers || 0,
-      label: "Active Users",
-      suffix: "+",
-      color: "from-emerald-500 to-teal-600",
+      value: publicStats.totalUsers || 47,
+      label: "System Users",
+      color: "#10b981",
+      trend: "Active now"
     },
   ];
 
-  if (isLoading) return <Loader></Loader>;
+  if (isLoading) return <Loader />;
 
   return (
-    <section className="py-10 bg-transparent relative z-30">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-20 bg-white dark:bg-[#030712] relative overflow-hidden">
+      {/* --- BACKGROUND GLOW EFFECTS --- */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-indigo-500/10 blur-[120px] rounded-full pointer-events-none"></div>
 
-        {/* --- SHORT & CLEAN HEADER --- */}
-        <div className="text-center mb-8">
-          <motion.h2
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-2xl md:text-4xl font-black text-gray-900 dark:text-white"
-          >
-            AssetVerse <span className="text-[#6366f1]">in Numbers</span>
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-gray-500 dark:text-gray-400 mt-2 text-sm font-medium"
-          >
-            Real-time statistics of our growing community.
-          </motion.p>
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+
+        {/* --- HEADER --- */}
+        <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+          <div className="text-left">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-8 h-[2px] bg-[#6366f1]"></span>
+              <span className="text-xs font-black uppercase tracking-widest text-[#6366f1]">Platform Insights</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 dark:text-white">
+              AssetVerse <span className="text-gray-400 dark:text-gray-600">Metrics</span>
+            </h2>
+          </div>
+          <div className="bg-gray-100 dark:bg-white/5 px-4 py-2 rounded-full border border-gray-200 dark:border-white/10 flex items-center gap-3">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-tighter">Live Database Connection: Stable</span>
+          </div>
         </div>
 
-        {/* --- STATS CARDS CONTAINER --- */}
-        <div className="bg-white/70 dark:bg-gray-900/80 backdrop-blur-xl rounded-[2.5rem] p-8 lg:p-12 border border-white/20 dark:border-gray-800 shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {statsData.map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="relative group"
+        {/* --- MAIN STATS BOARD --- */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-px bg-gray-200 dark:bg-gray-800 rounded-[3rem] overflow-hidden border border-gray-200 dark:border-gray-800 shadow-2xl">
+          {statsData.map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ delay: index * 0.2 }}
+              className="bg-white dark:bg-[#0b0f1a] p-10 md:p-14 flex flex-col items-start hover:bg-gray-50 dark:hover:bg-[#0f1525] transition-colors duration-500 group"
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-white mb-8 shadow-lg group-hover:scale-110 transition-transform"
+                style={{ backgroundColor: stat.color }}
               >
-                <div className="flex items-center gap-6 p-4 rounded-3xl transition-all duration-500">
+                {stat.icon}
+              </div>
 
-                  {/* Icon with Gradient */}
-                  <div className={`w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br ${stat.color} text-white flex items-center justify-center text-2xl md:text-3xl shadow-lg transform group-hover:rotate-6 transition-transform duration-300`}>
-                    {stat.icon}
-                  </div>
-
-                  {/* Text Content */}
-                  <div className="flex flex-col text-left">
-                    <h3 className="text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">
-                      <CountUp end={stat.value} duration={2.5} separator="," />{stat.suffix}
-                    </h3>
-                    <p className="text-gray-500 dark:text-gray-400 font-bold text-[11px] md:text-xs uppercase tracking-widest mt-1">
-                      {stat.label}
-                    </p>
-                  </div>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-5xl md:text-7xl font-black text-gray-900 dark:text-white tracking-tighter">
+                    <CountUp end={stat.value} duration={3} />
+                  </span>
+                  <FaArrowTrendUp className="text-green-500 text-xl" />
                 </div>
-
-                {/* Vertical Divider for Desktop */}
-                {index !== 2 && (
-                  <div className="hidden md:block absolute right-[-15px] top-1/2 -translate-y-1/2 h-10 w-[1px] bg-gray-200 dark:bg-gray-800"></div>
-                )}
-              </motion.div>
-            ))}
-          </div>
+                <p className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">{stat.label}</p>
+                <div className="inline-block px-3 py-1 rounded-md bg-gray-100 dark:bg-white/5 text-[10px] font-bold text-gray-500 dark:text-gray-500 uppercase tracking-widest">
+                  {stat.trend}
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>

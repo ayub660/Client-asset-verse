@@ -23,6 +23,7 @@ import PaymentCancelled from "../pages/dashboard/PaymentCancelled/PaymentCancell
 import MyAssets from "../pages/dashboard/MyAssets/MyAssets";
 import MyTeam from "../pages/dashboard/MyTeam/MyTeam";
 import Contact from "../Contact/Contact";
+import About from "../pages/home/About/About";
 
 export const router = createBrowserRouter([
   {
@@ -58,6 +59,10 @@ export const router = createBrowserRouter([
         path: "contact",
         element: <Contact />,
       },
+      {
+        path: "about",
+        element: <About></About>
+      }
 
     ],
   },

@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
-import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa6";
+import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaBuilding, FaUserTie } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import useAuth from "../../../hooks/useAuth";
 import useAxios from "../../../hooks/useAxios";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 const Login = () => {
   const axios = useAxios();
@@ -15,11 +16,33 @@ const Login = () => {
   const location = useLocation();
   const [passType, setPassType] = useState(false);
 
+
+  const [loading, setLoading] = useState(false);
+
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm();
+
+  // ✅ SweetAlert Utility for reuse
+  const showAlert = (title, text, icon = "error") => {
+    Swal.fire({
+      title: title,
+      text: text,
+      icon: icon,
+      confirmButtonColor: "#6366f1",
+    });
+  };
+
+  // ✅ Space Validation logic with SweetAlert
+  const handleSpaceCheck = (e) => {
+    const value = e.target.value;
+    if (/\s/.test(value)) {
+      showAlert("Space Detected!", "Space detected! Please remove any spaces from your email।", "warning");
+    }
+  };
 
   // ✅ JWT Handling Logic (Unchanged)
   const handleAuthSuccess = async (user) => {
@@ -36,28 +59,47 @@ const Login = () => {
         setTimeout(() => {
           const destination = location?.state || "/dashboard";
           navigate(destination, { replace: true });
+          setLoading(false);
         }, 500);
       }
     } catch (err) {
       console.error("JWT Error:", err);
-      toast.error("Authentication failed. User might not be in DB yet.");
+      showAlert("Auth Error", "Authentication failed. User might not be in DB yet.");
+      setLoading(false);
     }
   };
 
-  // ✅ Email / Password Login Logic (Unchanged)
+  // ✅ Email / Password Login Logic
   const handleLogin = async (data) => {
+
+    if (data.password.length < 8) {
+      showAlert("Weak Password!", "Password must be at least 8 characters long.", "warning");
+      return;
+    }
+
+    setLoading(true);
     try {
       const result = await loginWithEmail(data.email, data.password);
       toast.success(`Welcome Back ${result.user.displayName || "User"}`);
       await handleAuthSuccess(result.user);
     } catch (err) {
       console.error(err);
-      toast.error(err.message);
+      setLoading(false);
+
+
+      if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password") {
+        showAlert("Login Failed!", "Invalid email or password. Please try again.");
+      } else if (err.code === "auth/user-not-found") {
+        showAlert("User Not Found!", "No account found with this email.");
+      } else {
+        showAlert("Error!", err.message);
+      }
     }
   };
 
-  // ✅ Google Login Logic (Unchanged)
+  // ✅ Google Login Logic
   const handleGoogleLogin = async () => {
+    setLoading(true);
     try {
       const result = await loginWithGoogle();
       const user = result.user;
@@ -66,7 +108,29 @@ const Login = () => {
       await handleAuthSuccess(user);
     } catch (err) {
       console.error("Google Login Error:", err);
-      toast.error(err.message);
+      showAlert("Google Login Error", err.message);
+      setLoading(false);
+    }
+  };
+
+  // ✅ Demo Login Logic
+  const handleDemoLogin = (role) => {
+    if (role === "hr") {
+      setValue("email", "Hr@assetverse.com");
+      setValue("password", "Hr@assetverse.com");
+    } else {
+      setValue("email", "em@asssetverse.com");
+      setValue("password", "emp12345678");
+    }
+    toast.info(`${role.toUpperCase()} credentials filled!`);
+  };
+
+  // ✅ React Hook Form 
+  const onValidationError = (errors) => {
+    if (errors.password) {
+      showAlert("Security Notice", errors.password.message, "warning");
+    } else if (errors.email) {
+      showAlert("Email Required", errors.email.message, "warning");
     }
   };
 
@@ -86,11 +150,30 @@ const Login = () => {
           </p>
         </div>
 
+        {/* ✅ Demo Login Buttons */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <button
+            type="button"
+            onClick={() => handleDemoLogin("hr")}
+            className="flex items-center justify-center gap-2 py-3 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-orange-900/30 rounded-2xl font-bold hover:bg-orange-600 hover:text-white transition-all text-sm shadow-sm"
+          >
+            <FaBuilding /> HR Demo
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDemoLogin("employee")}
+            className="flex items-center justify-center gap-2 py-3 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30 rounded-2xl font-bold hover:bg-emerald-600 hover:text-white transition-all text-sm shadow-sm"
+          >
+            <FaUserTie /> Staff Demo
+          </button>
+        </div>
+
         {/* Google Login */}
         <button
+          disabled={loading}
           onClick={handleGoogleLogin}
           type="button"
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl text-base-content dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 mb-6 group"
+          className="w-full flex items-center justify-center gap-3 px-4 py-3 border-2 border-gray-100 dark:border-gray-700 rounded-2xl text-base-content dark:text-white font-bold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 mb-6 group disabled:opacity-50"
         >
           <FcGoogle className="text-2xl group-hover:scale-110 transition-transform" />
           <span>Continue with Google</span>
@@ -107,7 +190,8 @@ const Login = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(handleLogin)} className="space-y-5">
+        {/* ✅ handleSubmit এ onValidationError ফাংশন*/}
+        <form onSubmit={handleSubmit(handleLogin, onValidationError)} className="space-y-5">
           {/* Email Address */}
           <div className="space-y-2">
             <label className="text-sm font-bold text-base-content/80 dark:text-gray-300 ml-1">
@@ -116,15 +200,18 @@ const Login = () => {
             <div className="relative">
               <FaEnvelope className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
-                {...register("email", { required: "Email is Required" })}
+                {...register("email", {
+                  required: "Email is Required",
+                  validate: (v) => !/\s/.test(v) || "Email cannot contain spaces"
+                })}
+                onBlur={handleSpaceCheck}
                 type="email"
                 placeholder="Enter your email"
-
-                className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none text-black dark:text-white placeholder-gray-400"
+                className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none text-black dark:text-white placeholder-gray-400 transition-all"
               />
             </div>
             {errors.email && (
-              <p className="text-red-500 text-xs ml-2 font-bold">
+              <p className="text-red-500 text-xs ml-2 font-bold italic">
                 {errors.email.message}
               </p>
             )}
@@ -147,11 +234,13 @@ const Login = () => {
             <div className="relative">
               <FaLock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
-                {...register("password", { required: "Password is Required" })}
+                {...register("password", {
+                  required: "Password is Required",
+                  minLength: { value: 8, message: "Password must be at least 8 characters long" }
+                })}
                 type={passType ? "text" : "password"}
                 placeholder="••••••••"
-
-                className="w-full pl-12 pr-12 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none text-black dark:text-white placeholder-gray-400"
+                className="w-full pl-12 pr-12 py-3 bg-gray-50 dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-[#6366f1] outline-none text-black dark:text-white placeholder-gray-400 transition-all"
               />
               <button
                 type="button"
@@ -163,17 +252,26 @@ const Login = () => {
             </div>
 
             {errors.password && (
-              <p className="text-red-500 text-xs ml-2 font-bold">
+              <p className="text-red-500 text-xs ml-2 font-bold italic">
                 {errors.password.message}
               </p>
             )}
           </div>
 
+          {/* ✅ Sign In Button with Loading Spinner */}
           <button
+            disabled={loading}
             type="submit"
-            className="w-full py-4 bg-[#6366f1] text-white font-black rounded-2xl shadow-xl hover:bg-[#4f46e5] active:scale-[0.98] transition-all"
+            className="w-full py-4 bg-[#6366f1] text-white font-black rounded-2xl shadow-xl hover:bg-[#4f46e5] active:scale-[0.98] transition-all flex justify-center items-center gap-2 disabled:bg-indigo-400"
           >
-            Sign In
+            {loading ? (
+              <>
+                <span className="loading loading-spinner loading-md"></span>
+                Signing In...
+              </>
+            ) : (
+              "Sign In"
+            )}
           </button>
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 font-medium pt-4">
