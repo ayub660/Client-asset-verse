@@ -1,6 +1,5 @@
-import React from "react";
-import { Link, NavLink, Outlet } from "react-router-dom";
-
+import React, { useState, useRef, useEffect } from "react";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useRole from "../hooks/useRole";
 import useAxiosSecure from "../hooks/useAxiosSecure";
@@ -9,13 +8,8 @@ import Loading from "../components/Loading/Loading";
 import ThemeToggle from "../components/ThemeToggle/ThemeToggle";
 import Logo from "../components/Logo/Logo";
 
-import {
-  MdAssignmentAdd,
-} from "react-icons/md";
-import {
-  FaListOl,
-  FaUsers,
-} from "react-icons/fa6";
+import { MdAssignmentAdd } from "react-icons/md";
+import { FaListOl, FaUsers, FaBars, FaHome, FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import { VscGitPullRequestNewChanges, VscRequestChanges } from "react-icons/vsc";
 import { AiFillProduct } from "react-icons/ai";
 import { CgProfile } from "react-icons/cg";
@@ -27,6 +21,20 @@ const DashboardLayout = () => {
   const { user, logout } = useAuth();
   const axiosSecure = useAxiosSecure();
   const { role } = useRole();
+  const navigate = useNavigate();
+
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const { data: profile = {}, isLoading } = useQuery({
     queryKey: ["my-profile", user?.email],
@@ -39,9 +47,15 @@ const DashboardLayout = () => {
 
   if (isLoading) return <Loading />;
 
-  const handleLogOut = () => logout();
+  const handleLogOut = async () => {
+    await logout();
+    localStorage.removeItem("access-token");
+    navigate("/login");
+  };
 
-  // Sidebar menu items based on role
+  const profileImage = profile.companyLogo || profile.photo || user?.photoURL;
+  const displayName = profile.name || user?.displayName || "User";
+
   const menuItems = role === "hr" ? [
     { name: "Asset List", icon: <FaListOl />, link: "/dashboard/asset-list" },
     { name: "Add Asset", icon: <MdAssignmentAdd />, link: "/dashboard/add-asset" },
@@ -57,115 +71,110 @@ const DashboardLayout = () => {
   return (
     <div className="drawer lg:drawer-open">
       <input id="dashboard-drawer" type="checkbox" className="drawer-toggle" />
-      {/* Main content */}
-      <div className="drawer-content flex flex-col min-h-screen bg-base-100">
-        {/* Navbar */}
-        <nav className="navbar bg-base-200 shadow-md px-4 md:px-8 lg:px-12">
-          <label
-            htmlFor="dashboard-drawer"
-            className="btn btn-square btn-ghost lg:hidden"
-            aria-label="Open Sidebar"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </label>
 
-          <div className="flex items-center gap-2">
-            <Logo />
-            <span className="font-semibold text-lg hidden md:inline">Dashboard</span>
+      <div className="drawer-content flex flex-col min-h-screen bg-base-100 !overflow-visible">
+
+        {/* --- TOP NAVBAR --- */}
+        <nav className="navbar bg-base-100/80 backdrop-blur-md shadow-sm px-6 md:px-10 pt-4 pb-2 sticky top-0 z-[1000] border-b border-base-200">
+          <div className="navbar-start gap-2">
+            <label htmlFor="dashboard-drawer" className="btn btn-square btn-ghost lg:hidden">
+              <FaBars className="text-2xl md:text-3xl text-indigo-600" />
+            </label>
+
+            <div className="flex items-center gap-3">
+              <div className="p-1 bg-base-200 rounded-xl shadow-inner scale-95">
+                <Logo />
+              </div>
+              <span className="font-black text-xl text-indigo-600 italic tracking-tighter hidden md:inline uppercase">
+                Dashboard Panel
+              </span>
+            </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
+          <div className="navbar-end flex items-center gap-4 !overflow-visible">
             <ThemeToggle />
-            <Link
-              to="/dashboard"
-              className="tooltip tooltip-bottom"
-              data-tip={profile.name || "User"}
-            >
-              {profile.companyLogo || profile.photo ? (
-                <img
-                  src={profile.companyLogo || profile.photo}
-                  alt="User"
-                  className="w-10 h-10 rounded-full ring-2 ring-primary/30 object-cover"
-                />
-              ) : (
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center font-semibold text-primary">
-                  {profile?.name?.[0]?.toUpperCase() || "U"}
+            <div className="relative" ref={profileRef}>
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="btn btn-ghost btn-circle avatar online border border-indigo-500/10 shadow-sm"
+              >
+                <div className="w-10 rounded-full ring ring-indigo-500 ring-offset-base-100 ring-offset-2">
+                  <img src={profileImage || "https://i.ibb.co/mJR9Q19/user.png"} alt="User" />
+                </div>
+              </button>
+
+              {isProfileOpen && (
+                <div className="absolute right-0 mt-6 p-3 shadow-2xl bg-base-100 rounded-2xl w-60 border border-base-200 z-[1100] animate-in fade-in slide-in-from-top-2 duration-200">
+                  <div className="px-2 py-2 mb-2 border-b border-base-200 text-center">
+                    <p className="font-bold text-xs truncate">{displayName}</p>
+                    <p className="text-[9px] font-bold text-indigo-600 uppercase tracking-widest mt-0.5">{role} Panel</p>
+                  </div>
+                  <Link to="/" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 py-2.5 font-bold hover:text-orange-500 rounded-lg px-2 transition-colors text-xs">
+                    <FaHome className="text-orange-500 text-sm" /> Home Page
+                  </Link>
+                  <Link to="/dashboard/my-profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 py-2.5 font-bold hover:text-emerald-600 rounded-lg px-2 transition-colors text-xs">
+                    <FaUserCircle className="text-emerald-500 text-sm" /> My Profile
+                  </Link>
+                  <div className="divider my-1 opacity-50"></div>
+                  <button onClick={() => { handleLogOut(); setIsProfileOpen(false); }} className="flex items-center gap-3 py-2.5 font-bold text-red-500 hover:bg-red-50 w-full rounded-lg px-2 text-xs text-left">
+                    <FaSignOutAlt className="text-sm" /> Logout
+                  </button>
                 </div>
               )}
-            </Link>
+            </div>
           </div>
         </nav>
 
-        {/* Page Outlet */}
-        <main className="p-4 md:p-6 lg:p-8 flex-1">
+        <main className="p-4 md:p-6 lg:p-8 flex-1 !overflow-visible">
           <Outlet />
         </main>
       </div>
 
-      {/* Sidebar */}
-      <div className="drawer-side">
+      {/* --- SIDEBAR (Width: w-64, Font: text-sm) --- */}
+      <div className="drawer-side z-[2000]">
         <label htmlFor="dashboard-drawer" className="drawer-overlay"></label>
-        <aside className="bg-base-200 w-64 flex flex-col justify-between min-h-screen p-4">
-          <ul className="menu gap-1">
-            <li>
-              <NavLink to="/dashboard" className="flex items-center gap-3 p-2 rounded hover:bg-primary/10">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-5 h-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10z" />
-                </svg>
-                Dashboard Home
-              </NavLink>
-            </li>
+        <aside className="bg-base-200 w-64 flex flex-col justify-between min-h-screen p-4 border-r border-base-300">
+          <div>
+            <div className="mt-4 mb-8 px-4 text-center">
+              <h2 className="text-xl font-black text-indigo-600 tracking-tighter uppercase italic">AssetVerse</h2>
+            </div>
 
-            {menuItems.map((item) => (
-              <li key={item.name}>
-                <NavLink
-                  to={item.link}
-                  className="flex items-center gap-3 p-2 rounded hover:bg-primary/10"
-                >
-                  {item.icon}
-                  <span>{item.name}</span>
+            <ul className="menu gap-1 p-0">
+              <li>
+                <NavLink to="/dashboard" end className={({ isActive }) => `flex items-center gap-3 p-3 text-sm font-bold rounded-xl transition-all ${isActive ? "bg-indigo-600 text-white shadow-md" : "hover:bg-indigo-100"}`}>
+                  <FaHome className="text-lg" /> Dashboard Home
                 </NavLink>
               </li>
-            ))}
 
-            <li>
-              <NavLink
-                to="/dashboard/my-profile"
-                className="flex items-center gap-3 p-2 rounded hover:bg-primary/10"
-              >
-                <CgProfile />
-                My Profile
-              </NavLink>
-            </li>
+              {menuItems.map((item) => (
+                <li key={item.name}>
+                  <NavLink
+                    to={item.link}
+                    className={({ isActive }) => `flex items-center gap-3 p-3 text-sm font-bold rounded-xl transition-all ${isActive ? "bg-indigo-600 text-white shadow-md" : "hover:bg-indigo-100"}`}
+                  >
+                    <span className="text-lg">{item.icon}</span>
+                    <span>{item.name}</span>
+                  </NavLink>
+                </li>
+              ))}
 
-            <li>
-              <button
-                onClick={handleLogOut}
-                className="flex items-center gap-3 p-2 rounded hover:bg-red-100 text-red-600"
-              >
-                <IoLogOut />
-                Logout
-              </button>
-            </li>
-          </ul>
+              <li>
+                <NavLink
+                  to="/dashboard/my-profile"
+                  className={({ isActive }) => `flex items-center gap-3 p-3 text-sm font-bold rounded-xl transition-all ${isActive ? "bg-indigo-600 text-white shadow-md" : "hover:bg-indigo-100"}`}>
+                  <CgProfile className="text-lg" /> My Profile
+                </NavLink>
+              </li>
+            </ul>
+          </div>
 
-          <div className="mt-4 hidden md:block">
-            <ThemeToggle />
+          <div className="mt-auto pt-4 border-t border-base-300">
+            <button
+              onClick={handleLogOut}
+              className="flex items-center gap-3 p-3 w-full text-sm font-bold rounded-xl text-red-500 hover:bg-red-50 transition-all"
+            >
+              <IoLogOut className="text-xl" /> Logout
+            </button>
           </div>
         </aside>
       </div>

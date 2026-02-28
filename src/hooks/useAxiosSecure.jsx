@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useEffect } from "react";
-// import useAuth from "./useAuth";
 import useAuth from '../hooks/useAuth';
 import { useNavigate } from "react-router-dom";
 

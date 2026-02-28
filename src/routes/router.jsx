@@ -25,6 +25,7 @@ import MyTeam from "../pages/dashboard/MyTeam/MyTeam";
 import Contact from "../Contact/Contact";
 import About from "../pages/home/About/About";
 import AssetDetails from "../pages/AssetDetails/AssetDetails";
+import Help from "../pages/Help/Help";
 
 export const router = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ export const router = createBrowserRouter([
       {
         path: "register-hr",
         element: <RegisterHR />,
+      },
+      {
+        path: "help",
+        element: <Help></Help>,
       },
       {
         path: "payment-success",
@@ -125,6 +130,7 @@ export const router = createBrowserRouter([
         path: "asset-details/:id",
         element: <AssetDetails></AssetDetails>,
       },
+
 
     ],
   },
