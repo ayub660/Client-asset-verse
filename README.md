@@ -1,79 +1,89 @@
-AssetVerse | Corporate Asset Management System
-AssetVerse is a comprehensive B2B digital platform designed to help companies efficiently manage physical assets (laptops, keyboards, chairs, etc.) and track equipment assignments. It streamlines the workflow between HR Managers and Employees, ensuring accountability and reducing administrative overhead.
+# 🏢 AssetVerse | Corporate Asset Management System
 
-🌐 Live URL
-https://asset-verse-clients.netlify.app
+**AssetVerse** is a robust B2B digital platform designed to help companies efficiently manage physical assets (laptops, keyboards, chairs, etc.) and track equipment assignments. It bridges the gap between HR Managers and Employees with a seamless, role-based workflow.
 
-🔐 Admin/HR Test Credentials
-Email: hhhh@h.com
+---
 
-Password: hhhh@h.com
+## 🌐 Live URL
+[Live Site Link](https://asset-verse-clients.netlify.app)
 
-Employee test Credentials
-Email: x@1.com
+---
 
-Password: x@1.com
+## 🔐 Test Credentials
 
-🚀 Key Features
-Dual-Role Dashboard: Distinct interfaces and functionalities for HR Managers and Employees.
+To explore the platform's functionalities, you can use the following test accounts:
 
-Asset Inventory Management: HR can add, edit, and delete assets, tracking both Returnable and Non-returnable items.
+### **HR Manager Panel (Admin)**
+- **Email:** `Hr@assetverse.com`
+- **Password:** `Hr@assetverse.com`
 
-Real-time Request System: Employees can request assets from affiliated companies, while HR handles approvals and rejections.
+### **Employee Panel**
+- **Email:** `em@asssetverse.com`
+- **Password:** `emp12345678`
 
-Automatic Affiliation: Seamlessly connects employees to companies upon their first approved asset request.
+---
 
-Secure Authentication: Powered by Firebase with JWT (JSON Web Token) for secure API communication.
+## 🚀 Recent Updates & Enhancements
 
-Payment Integration: Stripe-powered subscription upgrades for HR Managers to increase employee limits.
+### ✨ Optimized User Experience
+- **Skeleton Loaders:** Integrated custom Skeleton Loaders across the Home Page and Dashboard to ensure a smooth perceived loading experience during data fetching.
+- **Home Page Interactivity:** Fully optimized landing page with a modern hero section, package cards, and testimonial sliders.
+- **Improved Data Fetching:** Optimized TanStack Query (React Query) implementations to handle background synchronization and cache management.
 
+### 🛡️ Enhanced Security & Routing
+- **Role-Based Protected Routes:** Implemented high-level route protection where users are automatically redirected based on their `HR` or `Employee` status.
+- **JWT Authentication:** Secure API communication with private route access, preventing unauthorized data manipulation.
+- **Authentication Persistence:** Reliable session management using Firebase and custom `useAuth` hooks.
 
+---
 
-Responsive Design: Fully optimized for mobile, tablet, and desktop using Tailwind CSS and DaisyUI.
+## 🛠️ Core Features
 
-🛠️ Technology Stack
-Frontend
-Framework: React.js (Vite)
+* **Dual-Role Dashboard:** Distinct, personalized interfaces for HR Managers and Employees.
+* **Asset Inventory Management:** HR can manage (Add/Edit/Delete) assets, distinguishing between **Returnable** and **Non-returnable** items.
+* **Real-time Request System:** Employees can request equipment; HR can Approve or Reject requests with a single click.
+* **Automatic Affiliation:** Seamlessly connects employees to their respective companies upon the first approved request.
+* **Payment Integration:** Stripe-powered subscription model for HR Managers to increase employee capacity limits.
+* **Responsive Sidebar:** Improved sidebar with adaptive font sizes and compact spacing for better usability on mobile and desktop.
 
-Styling: Tailwind CSS & DaisyUI
+---
 
-State Management: TanStack Query (React Query)
+## 💻 Technology Stack
 
+### **Frontend**
+- **Framework:** React.js (Vite)
+- **Styling:** Tailwind CSS & DaisyUI
+- **State Management:** TanStack Query (React Query)
+- **Forms:** React Hook Form
+- **Animations:** Framer Motion
 
+### **Backend**
+- **Runtime:** Node.js
+- **Framework:** Express.js
+- **Database:** MongoDB
+- **Security:** JWT (JSON Web Token) & Role-based Middleware
+- **Payments:** Stripe API
 
-Form Handling: React Hook Form
+---
 
-Animations: Framer Motion
+## 📦 Key NPM Packages
+- `firebase`: Authentication and hosting.
+- `axios`: Secure API requests with interceptors for JWT.
+- `react-to-print`: Generating PDF views for asset lists.
+- `sweetalert2`: Interactive and beautiful user notifications.
+- `dotenv`: Secure environment variable management.
 
-Backend
-Runtime: Node.js
+---
 
-Framework: Express.js
+## 🔮 Roadmap (Upcoming)
+- **Data Visualization:** HR analytics using Recharts (Asset trends and distribution).
+- **Company Notice Board:** System for HR to post official company-wide announcements.
+- **Real-time Image Upload:** Enhanced profile management with instant image previews.
 
-Database: MongoDB
+---
 
-Security: JWT (JSON Web Token) & Role-based Middleware
-
-Payment Gateway: Stripe API
-
-📦 Key NPM Packages Used
-firebase: Authentication and hosting configuration.
-
-axios: Handling secure API requests with interceptors.
-
-stripe: Processing secure payments for package upgrades.
-
-react-to-print: Generating PDF/Print views for asset lists.
-
-sweetalert2: For beautiful, interactive user notifications.
-
-dotenv: Managing environment variables securely.
-
-🔮 Upcoming Features (Roadmap)
-Data Visualization: Implementation of Recharts for HR analytics (Asset distribution and request trends).
-
-Notice Board: A system for HR to post company-wide announcements.
-
-Enhanced Profile: Real-time image upload and preview for profile pictures.
-
-
+### ⚙️ Local Setup
+1. Clone the repo: `git clone <repo-url>`
+2. Install dependencies: `npm install`
+3. Set up `.env` with Firebase, Stripe, and Backend keys.
+4. Run the app: `npm run dev`
